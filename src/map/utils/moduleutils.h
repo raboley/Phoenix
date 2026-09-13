@@ -41,8 +41,9 @@ class CPPModule
 {
 public:
     CPPModule()
-    : lua(::lua)
     {
+        // Module instances are constructed before main. Do not cache the global Lua-state
+        // reference here: its cross-translation-unit initialization order is unspecified.
         moduleutils::RegisterCPPModule(this);
     }
 
@@ -69,8 +70,6 @@ public:
         return new T();
     };
 
-protected:
-    sol::state& lua;
 };
 
 #define REGISTER_CPP_MODULE(className) \
@@ -115,7 +114,6 @@ void CleanupLuaModules();
 void ClearLuaModuleRegistries();
 void TryApplyLuaModules(const std::vector<std::string>& parts, bool isReload = false);
 void TryApplyRemainingLuaModules();
-auto GetDataModules(const std::string_view name, const std::string_view extension) -> std::vector<std::string>;
 void ReportLuaModuleUsage();
 
 }; // namespace moduleutils

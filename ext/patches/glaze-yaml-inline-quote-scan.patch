@@ -1,0 +1,18 @@
+diff --git a/include/glaze/yaml/read.hpp b/include/glaze/yaml/read.hpp
+index 9396c1c3..0a0656d9 100644
+--- a/include/glaze/yaml/read.hpp
++++ b/include/glaze/yaml/read.hpp
+@@ -3003,9 +3003,13 @@ namespace glz
+             const char c = *pos;
+             if (c == '\n' || c == '\r' || c == '#') return false;
+             if (c == '"' || c == '\'') {
++               // A quoted region that runs past the line end cannot carry a plain mapping
++               // indicator for this inline value. Without this guard an apostrophe inside a
++               // plain scalar (e.g. `a'b`) swallows following lines until the next quote.
+                const char quote = c;
+                ++pos;
+                while (pos != end && *pos != quote) {
++                  if (*pos == '\n' || *pos == '\r') return false;
+                   if (*pos == '\\' && quote == '"') {
+                      ++pos;
+                      if (pos != end) ++pos;

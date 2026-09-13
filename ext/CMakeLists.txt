@@ -139,10 +139,12 @@ if(earcut_hpp_ADDED) # header-only
 endif()
 
 # The pinned Glaze fix requires CMake 3.31, so expose its headers without adding its CMake project.
+# The patch works around https://github.com/stephenberry/glaze/issues/2826 until upstream fixes it.
 CPMAddPackage(
     NAME glaze
     GITHUB_REPOSITORY stephenberry/glaze
     GIT_TAG 2f6f5dcfe1a689bf79b443d83434fab264ce0a21
+    PATCHES patches/glaze-yaml-inline-quote-scan.patch
     DOWNLOAD_ONLY ON
 )
 if(glaze_ADDED)
