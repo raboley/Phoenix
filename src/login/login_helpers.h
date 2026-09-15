@@ -115,8 +115,6 @@ constexpr uint32 MaxClientCharacterId = 0x00FFFFFF;
 
 auto nextClientCharacterId(uint32 currentMaximum, uint32 configuredStart) -> Maybe<uint32>;
 
-auto makeNewCharacterInfo(const char_mini& createchar, uint32 charId, const std::string& serverName) -> lpkt_chr_info_sub2;
-
 int32 saveCharacter(uint32 accid, uint32 charid, char_mini* createchar);
 
 int32 createCharacter(session_t& session, uint8* buf, lpkt_chr_info_sub2& charInfo);
