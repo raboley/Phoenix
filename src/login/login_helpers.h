@@ -108,6 +108,13 @@ uint16 generateExpansionBitmask();
 
 uint16 generateFeatureBitmask(const bool& needsOTP);
 
+// FFXI sends only the low 24 bits of the character identity back to the map
+// server during login. Values outside that range can be displayed by the
+// lobby, but the client cannot use them to enter the world.
+constexpr uint32 MaxClientCharacterId = 0x00FFFFFF;
+
+auto nextClientCharacterId(uint32 currentMaximum) -> Maybe<uint32>;
+
 int32 saveCharacter(uint32 accid, uint32 charid, char_mini* createchar);
 
 int32 createCharacter(session_t& session, uint8* buf, lpkt_chr_info_sub2& charInfo);
