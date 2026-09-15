@@ -113,7 +113,7 @@ uint16 generateFeatureBitmask(const bool& needsOTP);
 // lobby, but the client cannot use them to enter the world.
 constexpr uint32 MaxClientCharacterId = 0x00FFFFFF;
 
-auto nextClientCharacterId(uint32 currentMaximum) -> Maybe<uint32>;
+auto nextClientCharacterId(uint32 currentMaximum, uint32 configuredStart) -> Maybe<uint32>;
 
 int32 saveCharacter(uint32 accid, uint32 charid, char_mini* createchar);
 

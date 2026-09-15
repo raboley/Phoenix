@@ -545,14 +545,14 @@ uint16 generateFeatureBitmask(const bool& needsOTP)
     return mask;
 }
 
-auto nextClientCharacterId(const uint32 currentMaximum) -> Maybe<uint32>
+auto nextClientCharacterId(const uint32 currentMaximum, const uint32 configuredStart) -> Maybe<uint32>
 {
-    if (currentMaximum >= MaxClientCharacterId)
+    if (currentMaximum >= MaxClientCharacterId || configuredStart == 0 || configuredStart > MaxClientCharacterId)
     {
         return std::nullopt;
     }
 
-    return currentMaximum + 1;
+    return std::max(currentMaximum + 1, configuredStart);
 }
 
 int32 saveCharacter(uint32 accid, uint32 charid, char_mini* createchar)
@@ -720,7 +720,9 @@ int32 createCharacter(session_t& session, uint8* buf, lpkt_chr_info_sub2& charIn
     Maybe<uint32> charID;
     if (rset->rowsCount() != 0 && rset->next())
     {
-        charID = nextClientCharacterId(rset->get<uint32>("max_id"));
+        charID = nextClientCharacterId(
+            rset->get<uint32>("max_id"),
+            settings::get<uint32>("login.CHARACTER_ID_START"));
     }
 
     if (!charID.has_value())

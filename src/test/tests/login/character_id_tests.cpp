@@ -25,9 +25,13 @@
 
 TEST_CASE("character creation stays within the client login identity range", "[login][character]")
 {
-    REQUIRE(loginHelpers::nextClientCharacterId(0) == 1);
-    REQUIRE(loginHelpers::nextClientCharacterId(1) == 2);
-    REQUIRE(loginHelpers::nextClientCharacterId(loginHelpers::MaxClientCharacterId - 1) == loginHelpers::MaxClientCharacterId);
-    REQUIRE_FALSE(loginHelpers::nextClientCharacterId(loginHelpers::MaxClientCharacterId).has_value());
-    REQUIRE_FALSE(loginHelpers::nextClientCharacterId(loginHelpers::MaxClientCharacterId + 1).has_value());
+    REQUIRE(loginHelpers::nextClientCharacterId(0, 1) == 1);
+    REQUIRE(loginHelpers::nextClientCharacterId(1, 1) == 2);
+    REQUIRE(loginHelpers::nextClientCharacterId(2, 0x700000) == 0x700000);
+    REQUIRE(loginHelpers::nextClientCharacterId(0x700000, 0x700000) == 0x700001);
+    REQUIRE(loginHelpers::nextClientCharacterId(loginHelpers::MaxClientCharacterId - 1, 1) == loginHelpers::MaxClientCharacterId);
+    REQUIRE_FALSE(loginHelpers::nextClientCharacterId(loginHelpers::MaxClientCharacterId, 1).has_value());
+    REQUIRE_FALSE(loginHelpers::nextClientCharacterId(loginHelpers::MaxClientCharacterId + 1, 1).has_value());
+    REQUIRE_FALSE(loginHelpers::nextClientCharacterId(0, 0).has_value());
+    REQUIRE_FALSE(loginHelpers::nextClientCharacterId(0, loginHelpers::MaxClientCharacterId + 1).has_value());
 }
