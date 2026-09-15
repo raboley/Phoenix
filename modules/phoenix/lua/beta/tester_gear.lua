@@ -19,7 +19,7 @@ require('modules/module_utils')
 require('scripts/globals/player')
 -----------------------------------
 -- luacheck: globals addItemToContainer
-local m = Module:new('starting_gear')
+local m = Module:new('starting_gear', xi.settings.main.ENABLE_TESTER_GEAR == true)
 
 -- Helper: add equipment to a specific container (e.g. a wardrobe)
 local function addGear(player, container, items)

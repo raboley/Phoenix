@@ -114,6 +114,7 @@ xi.settings.main =
     START_GIL                      = 10,  -- Amount of gil given to newly created characters.
     START_INVENTORY                = 30,  -- Starting inventory and satchel size.  Ignores values < 30.  Do not set above 80!
     NEW_CHARACTER_CUTSCENE         = 1,   -- Set to 1 to enable opening cutscenes, 0 to disable.
+    ENABLE_TESTER_GEAR             = false, -- Give new characters the beta test-server wardrobes and consumables.
     NEW_ADVENTURER_PLAYTIME_LIMIT  = 240, -- Hours played before the New Adventurer icon is removed. 240 for retail, 10 for pre-TVR.
     SUBJOB_QUEST_LEVEL             = 18,  -- Minimum level to accept either subjob quest.  Set to 0 to start the game with subjobs unlocked.
     ADVANCED_JOB_LEVEL             = 30,  -- Minimum level to accept advanced job quests.  Set to 0 to start the game with advanced jobs.
