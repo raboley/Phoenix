@@ -555,6 +555,37 @@ auto nextClientCharacterId(const uint32 currentMaximum, const uint32 configuredS
     return std::max(currentMaximum + 1, configuredStart);
 }
 
+auto makeNewCharacterInfo(const char_mini& createchar, const uint32 charId, const std::string& serverName) -> lpkt_chr_info_sub2
+{
+    lpkt_chr_info_sub2 charInfo{};
+    const auto         charName = asStringFromUntrustedSource(createchar.m_name);
+
+    std::memcpy(charInfo.character_name, charName.c_str(), std::min(charName.size(), sizeof(charInfo.character_name) - 1));
+    std::memcpy(charInfo.world_name, serverName.c_str(), std::min(serverName.size(), sizeof(charInfo.world_name) - 1));
+
+    charInfo.ffxi_id           = charId;
+    charInfo.ffxi_id_world     = charId & 0xFFFF;
+    charInfo.worldid           = 0; // Multiple worlds are not supported yet.
+    charInfo.status            = 1; // Available
+    charInfo.race_change       = 0;
+    charInfo.renamef           = 0;
+    charInfo.ffxi_id_world_tbl = (charId >> 16) & 0xFF;
+
+    charInfo.character_info.mon_no       = createchar.m_look.race;
+    charInfo.character_info.mjob_no      = createchar.m_mjob;
+    charInfo.character_info.mjob_level   = 1;
+    charInfo.character_info.sjob_no      = 0;
+    charInfo.character_info.face_no      = createchar.m_look.face;
+    charInfo.character_info.town_no      = createchar.m_nation;
+    charInfo.character_info.zone_no      = static_cast<uint8>(createchar.m_zone);
+    charInfo.character_info.zone_no2     = static_cast<uint8>((static_cast<uint16>(createchar.m_zone) >> 8) & 1);
+    charInfo.character_info.hair_no      = createchar.m_look.face;
+    charInfo.character_info.size         = createchar.m_look.size;
+    charInfo.character_info.GrapIDTbl[0] = createchar.m_look.face;
+
+    return charInfo;
+}
+
 int32 saveCharacter(uint32 accid, uint32 charid, char_mini* createchar)
 {
     const auto charName = asStringFromUntrustedSource(createchar->m_name);
@@ -736,22 +767,12 @@ int32 createCharacter(session_t& session, uint8* buf, lpkt_chr_info_sub2& charIn
         return -1;
     }
 
-    // The client expects to fill some data in on character creation. We never _see_ the character, so we don't need to set Race/Face/Model etc.
-    // We are making an assumption on what it wants - so for now just copy what is probably required (name, charid and some other stuff related to IDs.)
-    std::memcpy(&charInfo.character_name, charName.c_str(), std::min(charName.size(), sizeof(charInfo.character_name)));
-
-    uint8  worldId     = 0;      // Use when multiple worlds are supported.
-    uint32 contentId   = *charID; // Reusing the character ID as the content ID (which is also the name of character folder within the USER directory) at the moment
-    uint16 charIdMain  = *charID & 0xFFFF;
-    uint8  charIdExtra = (*charID >> 16) & 0xFF;
-
-    charInfo.ffxi_id           = contentId;
-    charInfo.ffxi_id_world     = charIdMain;
-    charInfo.worldid           = worldId;
-    charInfo.status            = 1; // 0 = Invalid/Hidden, 1 = Available, 2 = Disabled (unpaid)
-    charInfo.race_change       = 0;
-    charInfo.renamef           = 0;
-    charInfo.ffxi_id_world_tbl = charIdExtra;
+    // This entry is inserted directly into the cached character list and is what
+    // the client uses immediately after registration.  It must be as complete as
+    // an entry rebuilt from the database on a later login; a name/id-only entry
+    // can make the client fail its initial USER-file setup before map login.
+    const auto serverName = settings::get<std::string>("main.SERVER_NAME");
+    charInfo              = makeNewCharacterInfo(createchar, *charID, serverName);
 
     ShowDebug(fmt::format("char <{}> successfully saved", charName));
     return 0;
