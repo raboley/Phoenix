@@ -262,6 +262,18 @@ int32 MapNetworking::recv_parse(uint8* buff, size_t* buffsize, MapSession* PSess
             }
             else
             {
+                if (const auto* existingSession = mapSessions_.getSessionByCharId(packetCharID))
+                {
+                    DebugSocketsFmt("Rejecting 0x00A for char {} from {}: no pending session; existing endpoint {} has pending-zone state {}",
+                                    packetCharID,
+                                    ipp.toString(),
+                                    existingSession->client_ipp.toString(),
+                                    existingSession->blowfish.status == BLOWFISH_PENDING_ZONE);
+                }
+                else
+                {
+                    DebugSocketsFmt("Rejecting 0x00A for char {} from {}: no pending or existing session", packetCharID, ipp.toString());
+                }
                 return -1;
             }
         }

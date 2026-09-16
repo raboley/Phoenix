@@ -161,6 +161,7 @@ struct MapSocket::Impl
     std::atomic<int64> maxEgressDepth_{ 0 };
 
     std::mutex                diagMutex_; // guards the reason sets (touched only on the error path)
+    std::set<std::error_code> recvReasons_;
     std::set<std::error_code> blockedReasons_;
     std::set<std::error_code> droppedReasons_;
 
@@ -260,6 +261,8 @@ void MapSocket::Impl::armReceive()
             else if (ec && ec != asio::error::operation_aborted)
             {
                 recvErrors_.fetch_add(1, std::memory_order_relaxed);
+                const std::lock_guard<std::mutex> lock(diagMutex_);
+                recvReasons_.insert(ec);
             }
 
             // operation_aborted means the socket was closed during shutdown; stop re-arming.
@@ -421,10 +424,12 @@ void MapSocket::Impl::flushDiagnostics()
     const auto egressBytes    = egressBytesSent_.exchange(0, std::memory_order_relaxed);
     const auto maxDepth       = maxEgressDepth_.exchange(0, std::memory_order_relaxed);
 
+    std::set<std::error_code> received;
     std::set<std::error_code> blocked;
     std::set<std::error_code> dropped;
     {
         const std::lock_guard<std::mutex> lock(diagMutex_);
+        received.swap(recvReasons_);
         blocked.swap(blockedReasons_);
         dropped.swap(droppedReasons_);
     }
@@ -493,7 +498,7 @@ void MapSocket::Impl::flushDiagnostics()
 
     if (recvErrors > 0)
     {
-        ShowErrorFmt("{} receive errors this tick", recvErrors);
+        ShowErrorFmt("{} receive errors this tick. Reasons: {}", recvErrors, reasonsToString(received));
     }
 }
 

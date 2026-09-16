@@ -214,6 +214,11 @@ void IPCClient::handleMessage_CharZone(const IPP& ipp, const ipc::CharZone& mess
 
     if (session) // Update in case of edge case
     {
+        DebugSocketsFmt("CharZone for char {} destination {} reused session endpoint {} with pending-zone state {}",
+                        message.charId,
+                        message.destinationZoneId,
+                        session->client_ipp.toString(),
+                        session->blowfish.status == BLOWFISH_PENDING_ZONE);
         session->tapLastUpdate();
     }
     else
