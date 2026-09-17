@@ -1,6 +1,77 @@
-# Legacy Limbus retail wipe and Temenos NPCs for temenos.
+# Legacy level 75 Limbus Temenos NPCs: the Armoury Crates and floor NPCs from modules/phoenix/sql/limbus at
+# phoenixffxi/Phoenix PR 194, plus deletions of retail-layout NPCs the Era DAT (ROM3/3/19.DAT) has no name for.
+# Doors are kept: they show no name and the zone Lua lists them by id.
 
 npcs:
+
+  # -- Retail NPCs the legacy Limbus does not have --
+
+  # Matter_Diffusion_Module
+  16929278: null
+  16929336: null
+  16929337: null
+  16929338: null
+  16929339: null
+  16929340: null
+  16929341: null
+  16929342: null
+  16929343: null
+  16929344: null
+  16929345: null
+  16929346: null
+  16929347: null
+  16929348: null
+  16929349: null
+  16929350: null
+  16929351: null
+  16929352: null
+  16929353: null
+  16929354: null
+  16929355: null
+  16929356: null
+  16929357: null
+  16929358: null
+  16929359: null
+  16929360: null
+  16929361: null
+
+  # Temenos_Operator
+  16929279: null
+
+  # Temenos_Furnace
+  16929280: null
+
+  # _j19
+  16929326: null
+
+  # _j1a
+  16929327: null
+
+  # _j1b
+  16929328: null
+
+  # _j1c
+  16929329: null
+
+  # _j1d
+  16929330: null
+
+  # _j1e
+  16929331: null
+
+  # Temenos_Coffer_#1
+  16929362: null
+
+  # Temenos_Coffer_#2
+  16929363: null
+
+  # Temenos_Coffer_#3
+  16929364: null
+
+  # Temenos_Coffer_#4
+  16929365: null
+
+  # -- Legacy Limbus NPCs --
 
   16928770:
     script:       Armoury_Crate
@@ -10,9 +81,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -27,9 +98,9 @@ npcs:
       look:
         type:  standard
         model: 962
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -44,9 +115,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -61,9 +132,9 @@ npcs:
       look:
         type:  standard
         model: 962
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -78,9 +149,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -95,9 +166,9 @@ npcs:
       look:
         type:  standard
         model: 962
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -112,9 +183,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -129,9 +200,9 @@ npcs:
       look:
         type:  standard
         model: 962
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -146,9 +217,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -163,9 +234,9 @@ npcs:
       look:
         type:  standard
         model: 962
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -180,9 +251,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -197,9 +268,9 @@ npcs:
       look:
         type:  standard
         model: 962
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -214,9 +285,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -231,9 +302,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -248,9 +319,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -265,9 +336,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -282,9 +353,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -299,9 +370,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -316,9 +387,9 @@ npcs:
       look:
         type:  standard
         model: 961
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -333,9 +404,9 @@ npcs:
       look:
         type:  standard
         model: 962
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -350,9 +421,9 @@ npcs:
       look:
         type:  standard
         model: 962
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -367,9 +438,9 @@ npcs:
       look:
         type:  standard
         model: 962
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -384,9 +455,9 @@ npcs:
       look:
         type:  standard
         model: 962
-      moving:        7
+      moving:           7
       entity_flags:  1155
-      animation_sub: 8
+      animation_sub:    8
     status:          cutscene_only
     speed:           40
     animation_speed: 40
@@ -425,7 +496,7 @@ npcs:
         type:  standard
         model: 52
       entity_flags: 2051
-      name_vis:     96
+      name_vis:       96
     content: soa
 
   16929189:
