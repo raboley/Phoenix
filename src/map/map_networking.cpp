@@ -78,7 +78,8 @@ void MapNetworking::handle_incoming_packet(ByteSpan buffer, const IPP& ipp)
     TracyZoneScoped;
 
     // find player session. May be null if there is a pending session for that char id
-    MapSession* PSession = mapSessions_.getSessionByIPP(ipp);
+    MapSession* PSession           = mapSessions_.getSessionByIPP(ipp);
+    const bool  hadEndpointSession = PSession != nullptr;
 
     // TODO: Don't copy into PBuff, use buffer directly and smaller scratch buffers if required
     std::memcpy(PBuff.data(), buffer.data(), buffer.size());
@@ -86,7 +87,7 @@ void MapNetworking::handle_incoming_packet(ByteSpan buffer, const IPP& ipp)
 
     // set PSession if it's null and the incoming packet is non-encrypted 0x00A
     int32 decryptCount = recv_parse(PBuff.data(), &size, PSession, ipp);
-    if (PSession == nullptr)
+    if (!hadEndpointSession)
     {
         return;
     }
@@ -188,7 +189,7 @@ int32 MapNetworking::map_decipher_packet(uint8* buff, size_t buffsize, MapSessio
     return -1;
 }
 
-int32 MapNetworking::recv_parse(uint8* buff, size_t* buffsize, MapSession* PSession, const IPP& ipp)
+int32 MapNetworking::recv_parse(uint8* buff, size_t* buffsize, MapSession*& PSession, const IPP& ipp)
 {
     TracyZoneScoped;
 
@@ -246,6 +247,14 @@ int32 MapNetworking::recv_parse(uint8* buff, size_t* buffsize, MapSession* PSess
         }
 
         uint32 packetCharID = loginPacket.UniqueNo;
+
+        if (PSession == nullptr || (PSession->charID != 0 && PSession->charID != packetCharID))
+        {
+            if (auto* rebound = mapSessions_.rebindZoningSession(packetCharID, ipp))
+            {
+                PSession = rebound;
+            }
+        }
 
         if (PSession == nullptr)
         {

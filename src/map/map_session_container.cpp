@@ -140,6 +140,11 @@ auto MapSessionContainer::getSessionByCharId(uint32 charId) -> MapSession*
 {
     TracyZoneScoped;
 
+    if (auto it = displaced_sessions_.find(charId); it != displaced_sessions_.end())
+    {
+        return it->second.get();
+    }
+
     for (const auto& [_, session] : sessions_)
     {
         if (session->charID == charId)
@@ -163,11 +168,77 @@ auto MapSessionContainer::getPendingSessionByCharId(uint32 charId) -> MapSession
     return nullptr;
 }
 
+auto MapSessionContainer::rebindZoningSession(uint32 charId, const IPP& ipp) -> MapSession*
+{
+    TracyZoneScoped;
+
+    auto* zoningSession = getSessionByCharId(charId);
+    if (!zoningSession || zoningSession->blowfish.status != BLOWFISH_PENDING_ZONE || zoningSession->PChar ||
+        zoningSession->client_ipp.getIP() != ipp.getIP())
+    {
+        return nullptr;
+    }
+
+    if (auto* occupant = getSessionByIPP(ipp))
+    {
+        if (occupant->charID == charId)
+        {
+            return occupant;
+        }
+
+        // A second zoning client may have been assigned the first client's old UDP port.
+        // Never displace an active character. Keep the old zoning session (and key) by
+        // character ID so it can still claim its new endpoint when its 0x00A arrives.
+        if (occupant->blowfish.status != BLOWFISH_PENDING_ZONE || occupant->PChar)
+        {
+            return nullptr;
+        }
+
+        const auto displacedCharId           = occupant->charID;
+        auto       displacedNode             = sessions_.extract(ipp);
+        displaced_sessions_[displacedCharId] = std::move(displacedNode.mapped());
+    }
+
+    const auto                  oldIPP = zoningSession->client_ipp;
+    std::unique_ptr<MapSession> reboundSession;
+    if (auto it = displaced_sessions_.find(charId); it != displaced_sessions_.end())
+    {
+        reboundSession = std::move(it->second);
+        displaced_sessions_.erase(it);
+    }
+    else
+    {
+        auto node = sessions_.extract(oldIPP);
+        if (!node.empty())
+        {
+            reboundSession = std::move(node.mapped());
+        }
+    }
+    if (!reboundSession)
+    {
+        return nullptr;
+    }
+    reboundSession->client_ipp = ipp;
+    reboundSession->tapLastUpdate();
+    auto* rebound = reboundSession.get();
+    sessions_.emplace(ipp, std::move(reboundSession));
+    DebugSocketsFmt("Rebound zoning session for char {} from {} to {}", charId, oldIPP.toString(), ipp.toString());
+    return rebound;
+}
+
 auto MapSessionContainer::getSessionByAccountId(uint32 accountId) -> MapSession*
 {
     TracyZoneScoped;
 
     for (const auto& [_, session] : sessions_)
+    {
+        if (session->accountID == accountId)
+        {
+            return session.get();
+        }
+    }
+
+    for (const auto& [_, session] : displaced_sessions_)
     {
         if (session->accountID == accountId)
         {
@@ -323,6 +394,20 @@ void MapSessionContainer::cleanupSessions(IPP mapIPP)
 
             return false; // Keep
         });
+
+    std::erase_if(
+        displaced_sessions_,
+        [&](auto& pair)
+        {
+            auto& session = pair.second;
+            if (earth_time::now() > session->last_update + std::chrono::seconds(timeoutSetting))
+            {
+                ShowWarningFmt("map_cleanup: displaced zoning session {} timed out", session->charID);
+                db::preparedStmt("DELETE FROM accounts_sessions WHERE charid = ?", session->charID);
+                return true;
+            }
+            return false;
+        });
 }
 
 void MapSessionContainer::destroySession(IPP ipp)
@@ -363,7 +448,15 @@ void MapSessionContainer::destroySession(MapSession* map_session_data)
         map_session_data->PChar.reset();
     }
 
-    sessions_.erase(map_session_data->client_ipp);
+    if (auto it = displaced_sessions_.find(map_session_data->charID);
+        it != displaced_sessions_.end() && it->second.get() == map_session_data)
+    {
+        displaced_sessions_.erase(it);
+    }
+    else
+    {
+        sessions_.erase(map_session_data->client_ipp);
+    }
 }
 
 void MapSessionContainer::destroyPendingSession(MapSession* map_session_data)
