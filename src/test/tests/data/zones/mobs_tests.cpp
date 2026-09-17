@@ -114,12 +114,13 @@ TEST_CASE("mobs: every template a spawn names exists", "[data][mob]")
     }
 }
 
-TEST_CASE("mobs: a template keeps its pool id and respawn", "[data][mob]")
+TEST_CASE("mobs: Phoenix launch starter override keeps the pool id and sets immediate respawn", "[data][mob]")
 {
     const auto& rabbit = templateNamed("Wild_Rabbit");
 
     REQUIRE(rabbit.Id == 4343);
-    REQUIRE(rabbit.Attributes.Respawn.value_or(0) == 60);
+    REQUIRE(rabbit.Attributes.Respawn.has_value());
+    REQUIRE(*rabbit.Attributes.Respawn == 0);
 }
 
 TEST_CASE("mobs: loot is named inline on the template", "[data][mob]")
@@ -128,7 +129,7 @@ TEST_CASE("mobs: loot is named inline on the template", "[data][mob]")
 
     REQUIRE(rabbit.Loot.Drops.size() == 2);
     REQUIRE(rabbit.Loot.Drops[0].Item == "slice_of_hare_meat");
-    REQUIRE(rabbit.Loot.Drops[0].Chance == 150);
+    REQUIRE(rabbit.Loot.Drops[0].Chance == 100);
     REQUIRE(rabbit.Loot.Steal.size() == 1);
     REQUIRE(rabbit.Loot.Steal[0] == "san_dorian_carrot");
     REQUIRE(rabbit.Loot.Despoil.size() == 2);
