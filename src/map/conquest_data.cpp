@@ -148,9 +148,6 @@ void ConquestData::updateInfluencePoints(const std::vector<influence_t>& influen
 
 void ConquestData::updateRegionControls(const std::vector<region_control_t>& updatedRegionControls)
 {
-    regionControls.clear();
-    for (const auto& regionControl : updatedRegionControls)
-    {
-        regionControls.emplace_back(regionControl);
-    }
+    // Assignment is safe when the GM tally-end command passes this cache back in.
+    regionControls = updatedRegionControls;
 }
