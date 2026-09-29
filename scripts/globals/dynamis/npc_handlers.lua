@@ -39,6 +39,17 @@ local function canRegisterNewPlayer(player, zoneId, entryInfo)
     return true
 end
 
+-- Era runs and their entry zone share one map process. Never consume a glass
+-- or admit a player when the destination's retained state is unavailable.
+local function runStateAvailable(player, dynaZoneId)
+    if xi.dynamis.runState.isReady(GetZone(dynaZoneId)) then
+        return true
+    end
+
+    player:printToPlayer('Dynamis is unavailable: its zone must be initialized on this map process.', xi.msg.channel.SYSTEM_3)
+    return false
+end
+
 -- ----------------
 -- Entry NPC Logic
 -- ----------------
@@ -63,6 +74,10 @@ xi.dynamis.entryNpcOnTrade = function(player, npc, trade)
     end
 
     local dynaZoneId  = entryInfo.dynaZone
+    if not runStateAvailable(player, dynaZoneId) then
+        return
+    end
+
     local currentTime = GetSystemTime()
     local lockout     = xi.dynamis.isPlayerLockedOut(player)
 
@@ -297,6 +312,11 @@ xi.dynamis.entryNpcOnEventUpdate = function(player, csid, option, npc)
         xi.dynamis.debugPrint('npc is valid - ID: ' .. tostring(npc:getID()) .. ' | Name: ' .. tostring(npc:getName()))
     end
 
+    if not runStateAvailable(player, dynaZoneId) then
+        player:instanceEntry(npc, 3)
+        return
+    end
+
     -- Process successful cutscene completion
     local zoneExpiration       = GetServerVariable(string.format('[DYNA]ExpirationTime_%s', dynaZoneId))
     local dynamisTimeRemaining = xi.dynamis.getDynaTimeRemaining(zoneExpiration)
@@ -333,8 +353,6 @@ xi.dynamis.entryNpcOnEventUpdate = function(player, csid, option, npc)
         player:tradeComplete()
 
         -- Create a perpetual hourglass item encoded with instance data
-        SetServerVariable(string.format('[DYNA]StartTime_%s', dynaZoneId), startTime)
-        SetServerVariable(string.format('[DYNA]ExpirationTime_%s', dynaZoneId), endTime)
         xi.dynamis.makeGlass(player, dynaZoneId, startTime, endTime)
 
         -- Register the Dynamis instance server-wide and register player
@@ -396,6 +414,10 @@ xi.dynamis.entryNpcOnEventFinishEra = function(player, csid, option)
             then
                 return
             end
+        end
+
+        if not runStateAvailable(player, entryInfo.dynaZone) then
+            return
         end
 
         xi.dynamis.registerPlayer(player)
