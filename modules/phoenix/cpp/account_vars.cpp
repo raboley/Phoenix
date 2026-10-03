@@ -9,12 +9,65 @@
  * - player:setAccountVar(varname, value, expiry) - Set an account variable (value 0 = delete)
  ************************************************************************/
 
+#include "account_vars.h"
+
 #include "common/database.h"
 #include "common/logging.h"
 #include "common/vana_time.h"
 #include "map/entities/char_entity.h"
 #include "map/lua/luautils.h"
 #include "map/utils/moduleutils.h"
+
+namespace accountvars
+{
+
+auto fetchAccountVar(const uint32 accountId, const std::string& varname) -> int32
+{
+    const auto rset = db::preparedStmt("SELECT value, expiry FROM account_vars WHERE accountid = ? AND varname = ? LIMIT 1", accountId, varname);
+
+    if (!rset || !rset->rowsCount() || !rset->next())
+    {
+        return 0;
+    }
+
+    const auto expiry = rset->get<uint32>("expiry");
+
+    // An expired variable reads as absent and is removed on the way out
+    if (expiry > 0 && expiry <= earth_time::timestamp())
+    {
+        db::preparedStmt("DELETE FROM account_vars WHERE accountid = ? AND varname = ?", accountId, varname);
+        return 0;
+    }
+
+    return rset->get<int32>("value");
+}
+
+// A value of zero deletes the variable
+void persistAccountVar(const uint32 accountId, const std::string& varname, const int32 value, const uint32 expiry)
+{
+    if (expiry > 0 && expiry <= earth_time::timestamp())
+    {
+        ShowWarningFmt("Attempting to set account variable '{}' with an expired time: {}", varname, expiry);
+        return;
+    }
+
+    if (value == 0)
+    {
+        db::preparedStmt("DELETE FROM account_vars WHERE accountid = ? AND varname = ? LIMIT 1", accountId, varname);
+        return;
+    }
+
+    db::preparedStmt("INSERT INTO account_vars SET accountid = ?, varname = ?, value = ?, expiry = ? "
+                     "ON DUPLICATE KEY UPDATE value = ?, expiry = ?",
+                     accountId,
+                     varname,
+                     value,
+                     expiry,
+                     value,
+                     expiry);
+}
+
+} // namespace accountvars
 
 class AccountVarsModule : public CPPModule
 {
@@ -27,34 +80,11 @@ class AccountVarsModule : public CPPModule
         db::preparedStmt("DELETE FROM account_vars WHERE expiry > 0 AND expiry <= ?", currentTimestamp);
 
         // Extend CLuaBaseEntity through the registered Lua type table.
-        lua["CBaseEntity"]["getAccountVar"] = [](CLuaBaseEntity* PLuaBaseEntity, std::string varname) -> int32
+        lua["CBaseEntity"]["getAccountVar"] = [](CLuaBaseEntity* PLuaBaseEntity, const std::string& varname) -> int32
         {
             if (auto PChar = dynamic_cast<CCharEntity*>(PLuaBaseEntity->GetBaseEntity()))
             {
-                uint32 accountId = PChar->accid;
-
-                const auto rset = db::preparedStmt(
-                    "SELECT value, expiry FROM account_vars WHERE accountid = ? AND varname = ? LIMIT 1",
-                    accountId,
-                    varname);
-
-                int32  value  = 0;
-                uint32 expiry = 0;
-
-                if (rset && rset->rowsCount() && rset->next())
-                {
-                    value  = rset->get<int32>(0);
-                    expiry = rset->get<uint32>(1);
-
-                    // If expired, delete the variable and return 0
-                    if (expiry > 0 && expiry <= earth_time::timestamp())
-                    {
-                        value = 0;
-                        db::preparedStmt("DELETE FROM account_vars WHERE accountid = ? AND varname = ?", accountId, varname);
-                    }
-                }
-
-                return value;
+                return accountvars::fetchAccountVar(PChar->accid, varname);
             }
 
             return 0;
@@ -62,44 +92,18 @@ class AccountVarsModule : public CPPModule
 
         // Register setAccountVar method: player:setAccountVar(varname, value, expiry)
         // Notes: Passing a '0' value will delete the variable
-        lua["CBaseEntity"]["setAccountVar"] = [](CLuaBaseEntity* PLuaBaseEntity, std::string varname, int32 value, sol::object const& expiry) -> void
+        lua["CBaseEntity"]["setAccountVar"] = [](CLuaBaseEntity* PLuaBaseEntity, const std::string& varname, int32 value, const sol::object& expiry) -> void
         {
             if (auto PChar = dynamic_cast<CCharEntity*>(PLuaBaseEntity->GetBaseEntity()))
             {
-                uint32 accountId   = PChar->accid;
                 uint32 expiryValue = 0;
 
-                // Handle optional expiry parameter
                 if (expiry.is<uint32>())
                 {
                     expiryValue = expiry.as<uint32>();
                 }
 
-                // Validate expiry timestamp
-                if (expiryValue > 0 && expiryValue <= earth_time::timestamp())
-                {
-                    ShowWarning(fmt::format("Attempting to set account variable '{}' with an expired time: {}", varname, expiryValue));
-                    return;
-                }
-
-                // If value is 0, delete the variable
-                if (value == 0)
-                {
-                    db::preparedStmt("DELETE FROM account_vars WHERE accountid = ? AND varname = ? LIMIT 1", accountId, varname);
-                }
-                else
-                {
-                    // Insert or update the account variable
-                    db::preparedStmt(
-                        "INSERT INTO account_vars SET accountid = ?, varname = ?, value = ?, expiry = ? "
-                        "ON DUPLICATE KEY UPDATE value = ?, expiry = ?",
-                        accountId,
-                        varname,
-                        value,
-                        expiryValue,
-                        value,
-                        expiryValue);
-                }
+                accountvars::persistAccountVar(PChar->accid, varname, value, expiryValue);
             }
         };
     }

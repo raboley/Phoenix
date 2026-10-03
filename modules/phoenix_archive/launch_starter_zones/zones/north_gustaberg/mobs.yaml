@@ -1,0 +1,1956 @@
+# Launch starter zones for north_gustaberg.
+# Adds 200 level 1 mobs, 100 of each type, using the original mobs' spawn regions.
+# The original non-aggressive mobs listed below use a 60-second respawn setting.
+# NMs, aggressive mobs, quest/scripted mobs, fished mobs, event mobs, and
+# night/evening/weather/fog spawns keep their normal timers.
+# NM placeholders keep their normal timers through the individual spawn overrides below.
+# Other mobs of the same type use the 60-second setting.
+# Dropping a quest item does not make a normal mob a quest mob.
+# Extra mobs keep the original loot and respawn after 15 seconds.
+# pxi_launch_names.lua blocks their drops if the credited killer gets no EXP.
+# Disable this data module and pxi_launch_names.lua together, then restart.
+
+templates:
+
+  Huge_Hornet:
+    attributes:
+      spawn:
+        respawn: 60
+
+  Maneating_Hornet:
+    attributes:
+      spawn:
+        respawn: 60
+
+  Ornery_Sheep:
+    attributes:
+      spawn:
+        respawn: 60
+
+  River_Crab:
+    attributes:
+      spawn:
+        respawn: 60
+
+  Rock_Lizard:
+    attributes:
+      spawn:
+        respawn: 60
+
+  Stone_Eater:
+    attributes:
+      spawn:
+        respawn: 60
+
+  Tunnel_Worm:
+    attributes:
+      spawn:
+        respawn: 60
+
+  Vulture:
+    attributes:
+      spawn:
+        respawn: 60
+
+  Walking_Sapling:
+    attributes:
+      spawn:
+        respawn: 60
+
+spawns:
+
+  17211531: # Stinging Sophie placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211532: # Stinging Sophie placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211533: # Stinging Sophie placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211534: # Stinging Sophie placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211535: # Stinging Sophie placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211536: # Stinging Sophie placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211556: # Stinging Sophie placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211557: # Stinging Sophie placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211558: # Stinging Sophie placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211559: # Stinging Sophie placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211560: # Stinging Sophie placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211697: # Maighdean Uaine placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211698: # Maighdean Uaine placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211699: # Maighdean Uaine placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211700: # Maighdean Uaine placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211701: # Maighdean Uaine placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211710: # Maighdean Uaine placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  17211711: # Maighdean Uaine placeholder
+    attributes:
+      spawn:
+        respawn: 180
+
+  # Huge_Hornet: 100 copies, split between regions based on the original spawn counts.
+  # e_6: 31, e_22: 31, e_38: 38.
+
+  17212216:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212217:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212218:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212219:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212220:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212221:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212222:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212223:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212224:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212225:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212226:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212227:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212228:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212229:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212230:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212231:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212232:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212233:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212234:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212235:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212236:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212237:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212238:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212239:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212240:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212241:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212242:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212243:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212244:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212245:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212246:
+    template: Huge_Hornet
+    region:   e_6
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212247:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212248:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212249:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212250:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212251:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212252:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212253:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212254:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212255:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212256:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212257:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212258:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212259:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212260:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212261:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212262:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212263:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212264:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212265:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212266:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212267:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212268:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212269:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212270:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212271:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212272:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212273:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212274:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212275:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212276:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212277:
+    template: Huge_Hornet
+    region:   e_22
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212278:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212279:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212280:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212281:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212282:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212283:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212284:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212285:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212286:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212287:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212288:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212289:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212290:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212291:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212292:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212293:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212294:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212295:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212296:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212297:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212298:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212299:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212300:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212301:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212302:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212303:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212304:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212305:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212306:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212307:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212308:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212309:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212310:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212311:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212312:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212313:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212314:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212315:
+    template: Huge_Hornet
+    region:   e_38
+    level:    [1, 1]
+    script:   Huge_Hornet
+    attributes:
+      spawn:
+        respawn: 0
+
+  # Tunnel_Worm: 100 copies, split between regions based on the original spawn counts.
+  # e_6: 31, e_30: 31, e_38: 38.
+
+  17212316:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212317:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212318:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212319:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212320:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212321:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212322:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212323:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212324:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212325:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212326:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212327:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212328:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212329:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212330:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212331:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212332:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212333:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212334:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212335:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212336:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212337:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212338:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212339:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212340:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212341:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212342:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212343:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212344:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212345:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212346:
+    template: Tunnel_Worm
+    region:   e_6
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212347:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212348:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212349:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212350:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212351:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212352:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212353:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212354:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212355:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212356:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212357:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212358:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212359:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212360:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212361:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212362:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212363:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212364:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212365:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212366:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212367:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212368:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212369:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212370:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212371:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212372:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212373:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212374:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212375:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212376:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212377:
+    template: Tunnel_Worm
+    region:   e_30
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212378:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212379:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212380:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212381:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212382:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212383:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212384:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212385:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212386:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212387:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212388:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212389:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212390:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212391:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212392:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212393:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212394:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212395:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212396:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212397:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212398:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212399:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212400:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212401:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212402:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212403:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212404:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212405:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212406:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212407:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212408:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212409:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212410:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212411:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212412:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212413:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212414:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0
+
+  17212415:
+    template: Tunnel_Worm
+    region:   e_38
+    level:    [1, 1]
+    script:   Tunnel_Worm
+    attributes:
+      spawn:
+        respawn: 0

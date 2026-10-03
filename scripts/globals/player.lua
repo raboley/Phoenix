@@ -1,4 +1,4 @@
-require('scripts/globals/abyssea')
+﻿require('scripts/globals/abyssea')
 require('scripts/globals/gear_sets')
 require('scripts/globals/quests')
 require('scripts/globals/teleports')
@@ -21,9 +21,9 @@ local startingRaceInfo =
 
 local startingNationInfo =
 {
-    [xi.nation.SANDORIA] = { ring = xi.item.SAN_DORIAN_RING,  map = xi.ki.MAP_OF_THE_SAN_DORIA_AREA, fameArea = xi.fameArea.SANDORIA },
-    [xi.nation.BASTOK  ] = { ring = xi.item.BASTOKAN_RING,    map = xi.ki.MAP_OF_THE_BASTOK_AREA,    fameArea = xi.fameArea.BASTOK   },
-    [xi.nation.WINDURST] = { ring = xi.item.WINDURSTIAN_RING, map = xi.ki.MAP_OF_THE_WINDURST_AREA,  fameArea = xi.fameArea.WINDURST },
+    [xi.nation.SANDORIA] = { ring = xi.item.SAN_DORIAN_RING,  map = xi.keyItem.MAP_OF_THE_SAN_DORIA_AREA, fameArea = xi.fameArea.SANDORIA },
+    [xi.nation.BASTOK  ] = { ring = xi.item.BASTOKAN_RING,    map = xi.keyItem.MAP_OF_THE_BASTOK_AREA,    fameArea = xi.fameArea.BASTOK   },
+    [xi.nation.WINDURST] = { ring = xi.item.WINDURSTIAN_RING, map = xi.keyItem.MAP_OF_THE_WINDURST_AREA,  fameArea = xi.fameArea.WINDURST },
 }
 
 local startingJobGear =
@@ -67,12 +67,12 @@ xi.player.charCreate = function(player)
     player:addKeyItem(nationInfo.map)
 
     -- add job-emote Key items
-    player:addKeyItem(xi.ki.JOB_GESTURE_WARRIOR)
-    player:addKeyItem(xi.ki.JOB_GESTURE_MONK)
-    player:addKeyItem(xi.ki.JOB_GESTURE_WHITE_MAGE)
-    player:addKeyItem(xi.ki.JOB_GESTURE_BLACK_MAGE)
-    player:addKeyItem(xi.ki.JOB_GESTURE_RED_MAGE)
-    player:addKeyItem(xi.ki.JOB_GESTURE_THIEF)
+    player:addKeyItem(xi.keyItem.JOB_GESTURE_WARRIOR)
+    player:addKeyItem(xi.keyItem.JOB_GESTURE_MONK)
+    player:addKeyItem(xi.keyItem.JOB_GESTURE_WHITE_MAGE)
+    player:addKeyItem(xi.keyItem.JOB_GESTURE_BLACK_MAGE)
+    player:addKeyItem(xi.keyItem.JOB_GESTURE_RED_MAGE)
+    player:addKeyItem(xi.keyItem.JOB_GESTURE_THIEF)
 
     -- add nation- and race-specific ring
     if nation == raceInfo.homeNation and not player:hasItem(nationInfo.ring) then
@@ -100,19 +100,19 @@ xi.player.charCreate = function(player)
 
     -- give all maps
     if xi.settings.main.ALL_MAPS == 1 then
-        for i = xi.ki.MAP_OF_THE_SAN_DORIA_AREA, xi.ki.MAP_OF_DIO_ABDHALJS_GHELSBA do
+        for i = xi.keyItem.MAP_OF_THE_SAN_DORIA_AREA, xi.keyItem.MAP_OF_DIO_ABDHALJS_GHELSBA do
             player:addKeyItem(i)
         end
 
-        for i = xi.ki.MAP_OF_AL_ZAHBI, xi.ki.MAP_OF_RAKAZNAR do
+        for i = xi.keyItem.MAP_OF_AL_ZAHBI, xi.keyItem.MAP_OF_RAKAZNAR do
             player:addKeyItem(i)
         end
 
-        for i = xi.ki.MAP_OF_RALA_WATERWAYS_U, xi.ki.MAP_OF_RAKAZNAR_U do
+        for i = xi.keyItem.MAP_OF_RALA_WATERWAYS_U, xi.keyItem.MAP_OF_RAKAZNAR_U do
             player:addKeyItem(i)
         end
 
-        for i = xi.ki.MAP_OF_ESCHA_ZITAH, xi.ki.MAP_OF_REISENJIMA do
+        for i = xi.keyItem.MAP_OF_ESCHA_ZITAH, xi.keyItem.MAP_OF_REISENJIMA do
             player:addKeyItem(i)
         end
     end
@@ -175,11 +175,19 @@ xi.player.onGameIn = function(player, firstLogin, zoning)
         end
     end
 
-    local zoneID    = player:getZoneID()
-    local questVars = player:getCharVarsWithSuffix(']mustZone')
+    local zoneID         = player:getZoneID()
+    local questVars      = player:getCharVarsWithSuffix(']mustZone')
+    local previousZoneID = player:getPreviousZone()
 
     for tag, value in pairs(questVars) do
         if value ~= zoneID then
+            player:setCharVar(tag, 0)
+        elseif -- Catch the case of zoning from Moghouse to the zone the Moghouse was entered from
+            previousZoneID == zoneID and
+            value == zoneID and
+            zoning and
+            utils.contains(value, xi.moghouse.moghouseZones)
+        then
             player:setCharVar(tag, 0)
         end
     end
@@ -272,10 +280,10 @@ xi.player.onPlayerMount = function(player)
     -- the Mimeo Jewel should a player be mounted, zone, or disconnect.
     if
         player:getZoneID() == xi.zone.ATTOHWA_CHASM and
-        player:hasKeyItem(xi.ki.MIMEO_JEWEL)
+        player:hasKeyItem(xi.keyItem.MIMEO_JEWEL)
     then
-        player:messageSpecial(zones[xi.zone.ATTOHWA_CHASM].text.MIMEO_JEWEL_OFFSET + 4, xi.ki.MIMEO_JEWEL)
-        player:delKeyItem(xi.ki.MIMEO_JEWEL)
+        player:messageSpecial(zones[xi.zone.ATTOHWA_CHASM].text.MIMEO_JEWEL_OFFSET + 4, xi.keyItem.MIMEO_JEWEL)
+        player:delKeyItem(xi.keyItem.MIMEO_JEWEL)
     end
 end
 

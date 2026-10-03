@@ -1,0 +1,13 @@
+# Remove Mushroom Locust, added to Overgrown Rose in the March 23, 2010 update.
+# Source: https://www.playonline.com/pcd/verup/ff11us/detail/5338/detail.html
+
+templates:
+  Overgrown_Rose:
+    loot:
+      drops:
+        - chance: very_common
+          item:   malboro_vine
+        - chance: rare
+          item:   wild_pineapple
+        - chance: very_rare
+          item:   lacquer_tree_log

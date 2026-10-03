@@ -2433,7 +2433,13 @@ void OnGameIn(CCharEntity* PChar, bool zoning)
 
     ShowTraceFmt("luautils::OnGameIn: {}", PChar->getName());
 
-    callGlobal<void>("xi.player.onGameIn", PChar, PChar->GetPlayTime(false) == 0s, zoning);
+    // game time of 0 is not reliable to determine if the char needs the starter fame/gear
+    // You can DC in the intro CS when logging in and your playtime is non-zero
+    // However, in charCreate, it adds NEW_ADVENTURER title. so lets check that to determine if charCreate needs to be called
+    // `xi.player.onGameIn` calls `xi.player.charCreate` when the 2nd param is true
+    bool needsFirstLogin = !charutils::hasTitle(PChar, 206); // 206 == xi.title.NEW_ADVENTURER
+
+    callGlobal<void>("xi.player.onGameIn", PChar, needsFirstLogin, zoning);
 }
 
 void OnZoneIn(CCharEntity* PChar)
@@ -5641,11 +5647,34 @@ void OnPlayerVolunteer(CCharEntity* PChar, const std::string& text)
     callGlobal<void>("xi.player.onPlayerVolunteer", PChar, text);
 }
 
-bool OnChocoboDig(CCharEntity* PChar)
+auto OnChocoboDig(CCharEntity* PChar) -> ChocoboDigResult
 {
     TracyZoneScoped;
 
-    return callGlobal<bool>("xi.chocoboDig.start", PChar);
+    auto func = detail::findGlobalLuaFunction("xi.chocoboDig.start");
+    if (!func.valid())
+    {
+        ShowErrorFmt("luautils::OnChocoboDig: xi.chocoboDig.start: Function not found");
+        return {};
+    }
+
+    const auto result = func(PChar);
+    if (!result.valid())
+    {
+        const auto err = result.get<sol::error>();
+        ShowErrorFmt("luautils::OnChocoboDig: {}", err.what());
+        return {};
+    }
+
+    const auto returned = [&](const int index)
+    {
+        return result.get_type(index) == sol::type::boolean && result.get<bool>(index);
+    };
+
+    return ChocoboDigResult{
+        .dug        = returned(0),
+        .keepGreens = returned(1),
+    };
 }
 
 // Loads a Lua function with a fallback hierarchy

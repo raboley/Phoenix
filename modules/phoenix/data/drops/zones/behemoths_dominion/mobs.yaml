@@ -1,4 +1,6 @@
 # Behemoth drops Savory Shank at uncommon instead of rare.
+# Remove Behemoth Meat from King Behemoth, added in the September 16, 2015 update.
+# Behemoth Meat: https://wiki.ffo.jp/html/34744.html
 
 templates:
   Behemoth:
@@ -14,3 +16,34 @@ templates:
           one_of:
             thundercloud: 90
             comet_tail:   10
+  King_Behemoth:
+    loot:
+      drops:
+        - chance: always
+          item:   behemoth_hide
+        - chance: common
+          item:   behemoth_hide
+        - chance: always
+          item:   behemoth_horn
+        - chance: very_common
+          item:   square_of_shining_cloth
+        - chance: common
+          item:   behemoth_horn
+        - chance: very_common
+          item:   behemoth_tongue
+        - chance: always
+          one_of:
+            wyrmal_abjuration_head:   31
+            aquarian_abjuration_feet: 23
+            earthen_abjuration_legs:  23
+            martial_abjuration_legs:  23
+        - chance: uncommon
+          one_of:
+            wyrmal_abjuration_head:   31
+            aquarian_abjuration_feet: 23
+            earthen_abjuration_legs:  23
+            martial_abjuration_legs:  23
+        - chance: always
+          one_of:
+            pixie_earring:  95
+            defending_ring:  5

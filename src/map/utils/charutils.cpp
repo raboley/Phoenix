@@ -69,6 +69,7 @@
 #include "packets/s2c/0x062_clistatus2.h"
 #include "packets/s2c/0x0ac_command_data.h"
 #include "packets/s2c/0x0ad_dungeon.h"
+#include "packets/s2c/0x0b4_config.h"
 #include "packets/s2c/0x0e0_group_comlink.h"
 #include "packets/s2c/0x119_abil_recast.h"
 
@@ -110,12 +111,13 @@
 #include "itemutils.h"
 #include "job_points.h"
 #include "map_engine.h"
+#include "mountutils.h"
 #include "petutils.h"
 #include "puppetutils.h"
 #include "synthutils.h"
 #include "zoneutils.h"
 
-#include "enums/key_items.h"
+#include "data/enums/key_item.h"
 #include "enums/quest_log.h"
 #include "items/item_furnishing.h"
 #include "items/item_linkshell.h"
@@ -171,41 +173,32 @@ namespace
 
 // Key items granting an increase to the rate of skillups
 const std::set skillupIncreaseKeyItems = {
-    KeyItem::RHAPSODY_IN_WHITE,
-    KeyItem::RHAPSODY_IN_CRIMSON,
-    KeyItem::RHAPSODY_IN_FUCHSIA
+    xi::KeyItem::RhapsodyInWhite,
+    xi::KeyItem::RhapsodyInCrimson,
+    xi::KeyItem::RhapsodyInFuchsia
 };
 
 // Key items granting an increase to earned capacity points
 const std::set capacityBonusKeyItems = {
-    KeyItem::RHAPSODY_IN_FUCHSIA,
-    KeyItem::RHAPSODY_IN_PUCE,
-    KeyItem::RHAPSODY_IN_OCHRE,
+    xi::KeyItem::RhapsodyInFuchsia,
+    xi::KeyItem::RhapsodyInPuce,
+    xi::KeyItem::RhapsodyInOchre,
 };
 
 // Key items reducing the time for traverser stones
 const std::set traverserStoneReductionKeyItems = {
-    KeyItem::AZURE_ABYSSITE_OF_CELERITY,
-    KeyItem::CRIMSON_ABYSSITE_OF_CELERITY,
-    KeyItem::IVORY_ABYSSITE_OF_CELERITY
+    xi::KeyItem::AzureAbyssiteOfCelerity,
+    xi::KeyItem::CrimsonAbyssiteOfCelerity,
+    xi::KeyItem::IvoryAbyssiteOfCelerity
 };
 
-// Callers reach these from Lua, so validate against the schema before formatting into a query.
-// TODO: Extract this into some sort of database metadata system that's populated on startup.
-auto isCharPointsColumn(const char* type) -> bool
+struct CharPointsQueries
 {
-    static std::unordered_set<std::string> charPointsColumnNames;
-    if (charPointsColumnNames.empty())
-    {
-        const auto names = db::getTableColumnNames("char_points");
-        for (const auto& name : names)
-        {
-            charPointsColumnNames.insert(name);
-        }
-    }
+    std::string select;
+    std::string update;
+};
 
-    return charPointsColumnNames.find(type) != charPointsColumnNames.end();
-}
+HashMap<std::string, CharPointsQueries> charPointsQueries;
 
 } // namespace
 
@@ -805,10 +798,10 @@ auto LoadFromCharUnlocksSQL(CCharEntity* PChar) -> void
 
 auto LoadFromCharPetSQL(CCharEntity* PChar) -> void
 {
-    const auto rset = db::preparedStmt("SELECT field_chocobo FROM char_pet WHERE charid = ?", PChar->id);
+    const auto rset = db::preparedStmt("SELECT chocobo_user_data FROM char_pet WHERE charid = ?", PChar->id);
     if (rset && rset->rowsCount() && rset->next())
     {
-        PChar->m_FieldChocobo = rset->get<uint32>("field_chocobo");
+        db::extractFromBlob(rset, "chocobo_user_data", PChar->m_chocoboUserData);
     }
 }
 
@@ -950,35 +943,22 @@ void LoadFromCharSpellsSQL(CCharEntity* PChar)
     // disable all spells
     PChar->m_SpellList.reset();
 
-    // Compile a list of all enabled expansions
-    std::vector<std::string> enabledExpansions;
+    std::vector<std::string_view> enabledExpansions;
     for (const auto& expansion : { "ROTZ", "COP", "TOAU", "WOTG", "ACP", "AMK", "ASA", "ABYSSEA", "SOA", "ROV", "TVR", "VOIDWATCH" })
     {
         if (luautils::IsContentEnabled(expansion))
         {
-            enabledExpansions.push_back(fmt::format("\"{}\"", expansion));
+            enabledExpansions.emplace_back(expansion);
         }
     }
 
-    std::string condition = "spell_list.content_tag IS NULL";
-
-    if (!enabledExpansions.empty())
-    {
-        condition = fmt::format("spell_list.content_tag IN ({}) OR spell_list.content_tag IS NULL", fmt::join(enabledExpansions, ","));
-    }
-
-    // Select all player spells from enabled expansions
-    //
-    // NOTE: We normally don't want to build a prepared statement with fmt::format,
-    //     : but this query is entirely internal, so it's OK.
-    auto query = fmt::format("SELECT char_spells.spellid "
-                             "FROM char_spells "
-                             "JOIN spell_list "
-                             "ON spell_list.spellid = char_spells.spellid "
-                             "WHERE charid = ? AND ({})",
-                             condition);
-
-    auto rset = db::preparedStmt(query, PChar->id);
+    const auto rset = db::preparedStmt("SELECT char_spells.spellid "
+                                       "FROM char_spells "
+                                       "JOIN spell_list "
+                                       "ON spell_list.spellid = char_spells.spellid "
+                                       "WHERE charid = ? AND (spell_list.content_tag IS NULL OR FIND_IN_SET(spell_list.content_tag, ?))",
+                                       PChar->id,
+                                       fmt::format("{}", fmt::join(enabledExpansions, ",")));
     if (rset && rset->rowsCount())
     {
         while (rset->next())
@@ -993,9 +973,9 @@ void LoadFromCharSpellsSQL(CCharEntity* PChar)
 
     // Handle trust spells that are enabled via settings.
     bool hasTrustPermit =
-        charutils::hasKeyItem(PChar, KeyItem::WINDURST_TRUST_PERMIT) ||
-        charutils::hasKeyItem(PChar, KeyItem::BASTOK_TRUST_PERMIT) ||
-        charutils::hasKeyItem(PChar, KeyItem::SAN_DORIA_TRUST_PERMIT);
+        charutils::hasKeyItem(PChar, xi::KeyItem::WindurstTrustPermit) ||
+        charutils::hasKeyItem(PChar, xi::KeyItem::BastokTrustPermit) ||
+        charutils::hasKeyItem(PChar, xi::KeyItem::SanDoriaTrustPermit);
 
     if (hasTrustPermit)
     {
@@ -2019,6 +1999,12 @@ void UnequipItem(CCharEntity* PChar, uint8 equipSlotID, Recalculate recalculate,
             PChar->updatemask |= UPDATE_HP;
             PChar->updatemask |= UPDATE_LOOK;
         }
+
+        // Racing silks change a personal chocobo's speed while worn; the client reads its own speed from 0x037.
+        if (mountutils::isPersonalChocobo(PChar))
+        {
+            PChar->pushPacket<CCharStatusPacket>(PChar);
+        }
     }
 }
 
@@ -2884,7 +2870,7 @@ void LoadJobChangeGear(CCharEntity* PChar)
                 {
                     bool found = false;
 
-                    for (uint8 slot = 0; slot < PChar->getStorage(container)->GetSize(); slot++)
+                    for (uint8 slot = 1; slot <= PChar->getStorage(container)->GetSize(); slot++)
                     {
                         auto* PEquip = dynamic_cast<CItemEquipment*>(PChar->getStorage(container)->GetItem(slot));
 
@@ -3125,13 +3111,19 @@ void EquipItem(CCharEntity* PChar, uint8 slotID, uint8 equipSlotID, uint8 contai
 
     if (equipSlotID == SLOT_MAIN || equipSlotID == SLOT_RANGED || equipSlotID == SLOT_SUB)
     {
+        bool isRangedInstrument = false;
+
         // Instruments and Handbells swapping keeps TP.
         // The outgoing instruments should have saved the TP in UnequipItem before getting here.
-        const bool isRangedInstrument =
-            PItem && PItem->isType(ITEM_EQUIPMENT) &&
-            (static_cast<CItemWeapon*>(PItem)->getSkillType() == xi::SkillType::StringInstrument ||
-             static_cast<CItemWeapon*>(PItem)->getSkillType() == xi::SkillType::WindInstrument ||
-             static_cast<CItemWeapon*>(PItem)->getSkillType() == xi::SkillType::Handbell);
+        if (auto* PRangedInstrument = dynamic_cast<CItemWeapon*>(PChar->getEquip(static_cast<SLOTTYPE>(equipSlotID))); PRangedInstrument)
+        {
+            if (PRangedInstrument->getSkillType() == xi::SkillType::StringInstrument ||
+                PRangedInstrument->getSkillType() == xi::SkillType::WindInstrument ||
+                PRangedInstrument->getSkillType() == xi::SkillType::Handbell)
+            {
+                isRangedInstrument = true;
+            }
+        }
 
         if (equipSucceeded && !isRangedInstrument)
         {
@@ -3153,6 +3145,12 @@ void EquipItem(CCharEntity* PChar, uint8 slotID, uint8 equipSlotID, uint8 contai
 
     PChar->updatemask |= UPDATE_HP;
     PChar->updatemask |= UPDATE_LOOK;
+
+    // Racing silks change a personal chocobo's speed while worn; the client reads its own speed from 0x037.
+    if (mountutils::isPersonalChocobo(PChar))
+    {
+        PChar->pushPacket<CCharStatusPacket>(PChar);
+    }
 
     PChar->setPersist(CharPersist::Equip | CharPersist::Look);
 }
@@ -3967,7 +3965,7 @@ void CheckWeaponSkill(CCharEntity* PChar, uint8 skill)
  *                                                                       *
  ************************************************************************/
 
-auto hasKeyItem(const CCharEntity* PChar, const KeyItem keyItemId) -> bool
+auto hasKeyItem(const CCharEntity* PChar, const xi::KeyItem keyItemId) -> bool
 {
     const auto keyItemTable = static_cast<uint16_t>(keyItemId) / 512;
     const auto keyItemIndex = static_cast<uint16_t>(keyItemId) % 512;
@@ -3981,7 +3979,7 @@ auto hasKeyItem(const CCharEntity* PChar, const KeyItem keyItemId) -> bool
     return PChar->keys.tables[keyItemTable].keyList[keyItemIndex];
 }
 
-auto seenKeyItem(CCharEntity* PChar, KeyItem keyItemId) -> bool
+auto seenKeyItem(CCharEntity* PChar, xi::KeyItem keyItemId) -> bool
 {
     const auto keyItemTable = static_cast<uint16_t>(keyItemId) / 512;
     const auto keyItemIndex = static_cast<uint16_t>(keyItemId) % 512;
@@ -3995,7 +3993,7 @@ auto seenKeyItem(CCharEntity* PChar, KeyItem keyItemId) -> bool
     return PChar->keys.tables[keyItemTable].seenList[keyItemIndex];
 }
 
-void markSeenKeyItem(CCharEntity* PChar, KeyItem keyItemId)
+void markSeenKeyItem(CCharEntity* PChar, xi::KeyItem keyItemId)
 {
     const auto keyItemTable = static_cast<uint16_t>(keyItemId) / 512;
     const auto keyItemIndex = static_cast<uint16_t>(keyItemId) % 512;
@@ -4009,7 +4007,7 @@ void markSeenKeyItem(CCharEntity* PChar, KeyItem keyItemId)
     PChar->keys.tables[keyItemTable].seenList[keyItemIndex] = true;
 }
 
-void unseenKeyItem(CCharEntity* PChar, KeyItem keyItemId)
+void unseenKeyItem(CCharEntity* PChar, xi::KeyItem keyItemId)
 {
     const auto keyItemTable = static_cast<uint16_t>(keyItemId) / 512;
     const auto keyItemIndex = static_cast<uint16_t>(keyItemId) % 512;
@@ -4023,7 +4021,7 @@ void unseenKeyItem(CCharEntity* PChar, KeyItem keyItemId)
     PChar->keys.tables[keyItemTable].seenList[keyItemIndex] = false;
 }
 
-void addKeyItem(CCharEntity* PChar, KeyItem keyItemId)
+void addKeyItem(CCharEntity* PChar, xi::KeyItem keyItemId)
 {
     const auto keyItemTable = static_cast<uint16_t>(keyItemId) / 512;
     const auto keyItemIndex = static_cast<uint16_t>(keyItemId) % 512;
@@ -4037,7 +4035,7 @@ void addKeyItem(CCharEntity* PChar, KeyItem keyItemId)
     PChar->keys.tables[keyItemTable].keyList[keyItemIndex] = true;
 }
 
-void delKeyItem(CCharEntity* PChar, KeyItem keyItemId)
+void delKeyItem(CCharEntity* PChar, xi::KeyItem keyItemId)
 {
     const auto keyItemTable = static_cast<uint16_t>(keyItemId) / 512;
     const auto keyItemIndex = static_cast<uint16_t>(keyItemId) % 512;
@@ -4718,7 +4716,7 @@ void DistributeCapacityPoints(CCharEntity* PChar, CMobEntity* PMob)
                 return;
             }
 
-            if (!hasKeyItem(PMember, KeyItem::JOB_BREAKER) || PMember->GetMLevel() < 99)
+            if (!hasKeyItem(PMember, xi::KeyItem::JobBreaker) || PMember->GetMLevel() < 99)
             {
                 // Do not grant Capacity points without Job Breaker or Level 99
                 return;
@@ -5115,7 +5113,7 @@ void AddExperiencePoints(bool expFromRaise, bool awardRegionPoints, bool fromScr
 
             // Add influence for the player's region.
             // TODO: Chain exp should not affect influence.
-            conquest::GainInfluencePoints(PChar, exp / 20);
+            conquest::GainInfluencePoints(PChar, exp);
         }
 
         // Should this user be awarded imperial standing..
@@ -6542,6 +6540,12 @@ void ReloadParty(CCharEntity* PChar)
             }
 
             PParty->PushMember(PChar);
+
+            // Joins accepted on another process land here instead of CParty::AddMember
+            if (PChar->isSeekingParty())
+            {
+                RemoveSeekFlag(PChar);
+            }
         }
 
         CBattleEntity* PSyncTarget = PChar->PParty->GetSyncTarget();
@@ -6608,17 +6612,24 @@ void ReloadParty(CCharEntity* PChar)
         PChar->ReloadPartyDec();
     }
 
-    // Attempt to disband party if the last trust was just released
-    // NOTE: Trusts are not counted as party members, so the current member count will be 1
-    if (PChar->PParty && PChar->PParty->HasOnlyOneMember() && PChar->PTrusts.empty())
+    // A party that was created with trusts disbands if they get dismissed
+    if (PChar->PParty && PChar->PParty->IsFormedByTrusts() && PChar->PTrusts.empty())
     {
-        // Looks good so far, check OTHER processes to see if we should disband
-        if (PChar->PParty->GetMemberCountAcrossAllProcesses() == 1)
-        {
-            PChar->PParty->DisbandParty();
-            destroy(PChar->PParty);
-        }
+        PChar->PParty->DisbandParty();
     }
+}
+
+void RemoveSeekFlag(CCharEntity* PChar)
+{
+    PChar->playerConfig.InviteFlg = false;
+    PChar->updatemask |= UPDATE_HP;
+
+    SaveCharStats(PChar);
+    SavePlayerSettings(PChar);
+
+    PChar->pushPacket<GP_SERV_COMMAND_CONFIG>(PChar);
+    PChar->pushPacket<CCharStatusPacket>(PChar);
+    PChar->pushPacket<CCharSyncPacket>(PChar);
 }
 
 bool IsAidBlocked(CCharEntity* PInitiator, CCharEntity* PTarget)
@@ -6672,17 +6683,14 @@ void SetPoints(CCharEntity* PChar, const char* type, int32 amount)
 {
     TracyZoneScoped;
 
-    if (!isCharPointsColumn(type))
+    const auto it = charPointsQueries.find(type);
+    if (it == charPointsQueries.end())
     {
         ShowErrorFmt("charutils::SetPoints: Invalid type {} for {}", type, PChar->getName());
         return;
     }
 
-    // NOTE: We normally don't want to build a prepared statement with fmt::format,
-    //     : but this query is entirely internal and we've just validated the incoming
-    //     : column name, so it's OK.
-    const auto query = fmt::format("UPDATE char_points SET {} = ? WHERE charid = ?", type);
-    db::preparedStmt(query, amount, PChar->id);
+    db::preparedStmt(it->second.update, amount, PChar->id);
 
     if (strcmp(type, "spark_of_eminence") == 0)
     {
@@ -6694,21 +6702,36 @@ int32 GetPoints(CCharEntity* PChar, const char* type)
 {
     TracyZoneScoped;
 
-    if (!isCharPointsColumn(type))
+    const auto it = charPointsQueries.find(type);
+    if (it == charPointsQueries.end())
     {
         ShowErrorFmt("charutils::GetPoints: Invalid type {} for {}", type, PChar->getName());
         return 0;
     }
 
-    // char_points is 200 columns wide, so SELECT * bound and fetched all of them to read one.
-    const auto query = fmt::format("SELECT {} FROM char_points WHERE charid = ? LIMIT 1", type);
-    const auto rset  = db::preparedStmt(query, PChar->id);
+    const auto rset = db::preparedStmt(it->second.select, PChar->id);
     if (rset && rset->rowsCount() && rset->next())
     {
-        return rset->get<int32>(type);
+        return rset->get<int32>(0);
     }
 
     return 0;
+}
+
+void LoadCharPointsQueries()
+{
+    charPointsQueries.clear();
+    for (const auto& name : db::getTableColumnNames("char_points"))
+    {
+        if (name != "charid")
+        {
+            charPointsQueries.emplace(name,
+                                      CharPointsQueries{
+                                          .select = fmt::format("SELECT {} FROM char_points WHERE charid = ? LIMIT 1", name),
+                                          .update = fmt::format("UPDATE char_points SET {} = ? WHERE charid = ?", name),
+                                      });
+        }
+    }
 }
 
 void SetUnityLeader(CCharEntity* PChar, uint8 leaderID)
@@ -7518,6 +7541,12 @@ void removeCharFromZone(CCharEntity* PChar)
     if (!PChar->PTrusts.empty())
     {
         PChar->ClearTrusts();
+    }
+
+    // The char wont tick again so ReloadParty needs to end the trust party here
+    if (PChar->PParty && PChar->PParty->IsFormedByTrusts())
+    {
+        PChar->PParty->DisbandParty();
     }
 
     if (PChar->status == xi::Status::Shutdown)

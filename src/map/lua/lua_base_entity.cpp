@@ -188,7 +188,7 @@ CLuaBaseEntity::CLuaBaseEntity(CBaseEntity* PEntity)
  *  Notes   : Mainly used for showing retail text specific to an NPC
  ************************************************************************/
 
-void CLuaBaseEntity::showText(CLuaBaseEntity* entity, uint16 messageID, const sol::object& p0, const sol::object& p1, const sol::object& p2, const sol::object& p3, const sol::object& p4, const sol::object& p5)
+void CLuaBaseEntity::showText(CLuaBaseEntity* entity, uint16 messageID, const sol::object& p0, const sol::object& p1, const sol::object& p2, const sol::object& p3, const sol::object& p4, const sol::object& p5, const sol::object& messageType)
 {
     if (!entity)
     {
@@ -219,13 +219,23 @@ void CLuaBaseEntity::showText(CLuaBaseEntity* entity, uint16 messageID, const so
         PBaseEntity->loc.zone->UpdateEntityPacket(PBaseEntity, ENTITY_UPDATE, UPDATE_POS);
     }
 
+    const auto type = [&]() -> std::optional<uint8>
+    {
+        if (messageType == sol::lua_nil)
+        {
+            return std::nullopt;
+        }
+
+        return messageType.as<uint8>();
+    }();
+
     if (m_PBaseEntity->objtype == TYPE_PC)
     {
-        static_cast<CCharEntity*>(m_PBaseEntity)->pushPacket<GP_SERV_COMMAND_TALKNUMWORK>(PBaseEntity, messageID, param0, param1, param2, param3, showName);
+        static_cast<CCharEntity*>(m_PBaseEntity)->pushPacket<GP_SERV_COMMAND_TALKNUMWORK>(PBaseEntity, messageID, param0, param1, param2, param3, showName, type);
     }
     else if (m_PBaseEntity->loc.zone)
     {
-        m_PBaseEntity->loc.zone->PushPacket(m_PBaseEntity, CHAR_INRANGE, std::make_unique<GP_SERV_COMMAND_TALKNUMWORK>(PBaseEntity, messageID, param0, param1, param3, showName));
+        m_PBaseEntity->loc.zone->PushPacket(m_PBaseEntity, CHAR_INRANGE, std::make_unique<GP_SERV_COMMAND_TALKNUMWORK>(PBaseEntity, messageID, param0, param1, param2, param3, showName, type));
     }
 }
 
@@ -475,11 +485,11 @@ void CLuaBaseEntity::messageBasic(uint16 messageID, const sol::object& p0, const
 /************************************************************************
  *  Function: messageName()
  *  Purpose : Message displayed with an entity's name in it
- *  Example : target:messageName(messageID, entity, param0, param1, param2, param3, chatType);
+ *  Example : target:messageName(messageID, entity, param0, param1, param2, param3, chatType, sender);
  *  Notes   : Used in Doom countdown messages, as an example
  ************************************************************************/
 
-void CLuaBaseEntity::messageName(uint16 messageID, const sol::object& entity, const sol::object& p0, const sol::object& p1, const sol::object& p2, const sol::object& p3, const sol::object& chat)
+void CLuaBaseEntity::messageName(uint16 messageID, const sol::object& entity, const sol::object& p0, const sol::object& p1, const sol::object& p2, const sol::object& p3, const sol::object& chat, const sol::object& sender)
 {
     CLuaBaseEntity* PLuaEntity  = (entity != sol::lua_nil) ? entity.as<CLuaBaseEntity*>() : nullptr;
     CBaseEntity*    PNameEntity = PLuaEntity ? PLuaEntity->m_PBaseEntity : nullptr;
@@ -493,7 +503,18 @@ void CLuaBaseEntity::messageName(uint16 messageID, const sol::object& entity, co
 
     if (CCharEntity* PChar = dynamic_cast<CCharEntity*>(m_PBaseEntity))
     {
-        PChar->pushPacket<GP_SERV_COMMAND_TALKNUMWORK2>(PChar, messageID, PNameEntity, param0, param1, param2, param3, chatType);
+        CLuaBaseEntity* const PLuaSender = [&]() -> CLuaBaseEntity*
+        {
+            if (sender == sol::lua_nil)
+            {
+                return nullptr;
+            }
+
+            return sender.as<CLuaBaseEntity*>();
+        }();
+        CBaseEntity* PSender = PLuaSender ? PLuaSender->m_PBaseEntity : PChar;
+
+        PChar->pushPacket<GP_SERV_COMMAND_TALKNUMWORK2>(PSender, messageID, PNameEntity, param0, param1, param2, param3, chatType, PLuaSender != nullptr);
     }
     else if (m_PBaseEntity->loc.zone)
     {
@@ -9291,11 +9312,11 @@ void CLuaBaseEntity::completeAssault(const uint8 missionID) const
 /************************************************************************
  *  Function: addKeyItem()
  *  Purpose : Adds a key item to the player
- *  Example : player:addKeyItem(xi.ki.MOGHANCEMENT_FIRE)
+ *  Example : player:addKeyItem(xi.keyItem.MOGHANCEMENT_FIRE)
  *  Notes   :
  ************************************************************************/
 
-void CLuaBaseEntity::addKeyItem(const KeyItem keyItemID) const
+void CLuaBaseEntity::addKeyItem(const xi::KeyItem keyItemID) const
 {
     if (m_PBaseEntity->objtype != TYPE_PC)
     {
@@ -9326,11 +9347,11 @@ void CLuaBaseEntity::addKeyItem(const KeyItem keyItemID) const
 /************************************************************************
  *  Function: hasKeyItem()
  *  Purpose : Returns true if a player has a specified key item
- *  Example : if (player:hasKeyItem(xi.ki.TORN_PAPER)) then
+ *  Example : if (player:hasKeyItem(xi.keyItem.TORN_PAPER)) then
  *  Notes   :
  ************************************************************************/
 
-auto CLuaBaseEntity::hasKeyItem(const KeyItem keyItemID) const -> bool
+auto CLuaBaseEntity::hasKeyItem(const xi::KeyItem keyItemID) const -> bool
 {
     if (m_PBaseEntity->objtype != TYPE_PC)
     {
@@ -9344,11 +9365,11 @@ auto CLuaBaseEntity::hasKeyItem(const KeyItem keyItemID) const -> bool
 /************************************************************************
  *  Function: delKeyItem()
  *  Purpose : Deletes a key item from the player
- *  Example : player:delKeyItem(xi.ki.SUNBEAM_FRAGMENT)
+ *  Example : player:delKeyItem(xi.keyItem.SUNBEAM_FRAGMENT)
  *  Notes   :
  ************************************************************************/
 
-void CLuaBaseEntity::delKeyItem(const KeyItem keyItemID) const
+void CLuaBaseEntity::delKeyItem(const xi::KeyItem keyItemID) const
 {
     if (m_PBaseEntity->objtype != TYPE_PC)
     {
@@ -9374,11 +9395,11 @@ void CLuaBaseEntity::delKeyItem(const KeyItem keyItemID) const
 /************************************************************************
  *  Function: seenKeyItem()
  *  Purpose : Returns true if a player has peeked at the key item
- *  Example : if player:seenKeyItem(xi.ki.LETTER_FROM_ROH_LATTEH) then
+ *  Example : if player:seenKeyItem(xi.keyItem.LETTER_FROM_ROH_LATTEH) then
  *  Notes   :
  ************************************************************************/
 
-bool CLuaBaseEntity::seenKeyItem(const KeyItem keyItemID) const
+bool CLuaBaseEntity::seenKeyItem(const xi::KeyItem keyItemID) const
 {
     if (m_PBaseEntity->objtype != TYPE_PC)
     {
@@ -9392,11 +9413,11 @@ bool CLuaBaseEntity::seenKeyItem(const KeyItem keyItemID) const
 /************************************************************************
  *  Function: unseenKeyItem()
  *  Purpose : Restores a key item to unseen status
- *  Example : player:unseenKeyItem(xi.ki.MOGHANCEMENT_FIRE)
+ *  Example : player:unseenKeyItem(xi.keyItem.MOGHANCEMENT_FIRE)
  *  Notes   : Some things just can't be unseen... (not implemented though)
  ************************************************************************/
 
-void CLuaBaseEntity::unseenKeyItem(const KeyItem keyItemID) const
+void CLuaBaseEntity::unseenKeyItem(const xi::KeyItem keyItemID) const
 {
     if (m_PBaseEntity->objtype != TYPE_PC)
     {
@@ -16882,30 +16903,158 @@ void CLuaBaseEntity::setPetName(uint8 pType, uint16 value, const sol::object& ar
     }
 }
 
-void CLuaBaseEntity::registerChocobo(const ChocoboColor color, const sol::table& traits) const
+namespace
+{
+
+// An upsert, like setPetName, so a missing char_pet row cannot drop the write.
+void saveChocoboUserData(CCharEntity* PChar)
+{
+    const auto rset = db::preparedStmt("INSERT INTO char_pet SET charid = ?, chocobo_user_data = ? "
+                                       "ON DUPLICATE KEY UPDATE chocobo_user_data = VALUES(chocobo_user_data)",
+                                       PChar->id,
+                                       PChar->m_chocoboUserData);
+    if (!rset)
+    {
+        ShowErrorFmt("Failed to save chocobo user data ({})", PChar->getName());
+    }
+}
+
+} // namespace
+
+/************************************************************************
+ *  Function: registerChocobo()
+ *  Purpose : Registers a raised chocobo as the player's personal chocobo
+ *  Example : player:registerChocobo({ color = 1, largeBeak = true, speed = 90, minutes = 40 })
+ *  Notes   : Values beyond a field's width are clamped. Stats left out are stored as 0.
+ ************************************************************************/
+
+void CLuaBaseEntity::registerChocobo(const sol::table& chocobo) const
 {
     if (auto* PChar = dynamic_cast<CCharEntity*>(m_PBaseEntity))
     {
-        const auto largeBeak   = traits.get_or("largeBeak", false);
-        const auto fullTail    = traits.get_or("fullTail", false);
-        const auto largeTalons = traits.get_or("largeTalons", false);
+        auto newChocobo = ChocoboCustomProperties{};
 
-        const ChocoboCustomProperties newChocobo{
-            .traits = ChocoboPhysicalTraits{
-                .largeBeak   = largeBeak,
-                .largeTalons = largeTalons,
-                .fullTail    = fullTail,
-            },
-            .color = color,
+        newChocobo.largeBeak   = chocobo.get_or("largeBeak", false);
+        newChocobo.fullTail    = chocobo.get_or("fullTail", false);
+        newChocobo.largeTalons = chocobo.get_or("largeTalons", false);
+        newChocobo.color       = std::min<uint32>(chocobo.get_or<uint32>("color", 0), 4);
+        newChocobo.speed       = std::min<uint32>(chocobo.get_or<uint32>("speed", 0), 0x7F);
+        newChocobo.minutes     = std::min<uint32>(chocobo.get_or<uint32>("minutes", 0), 0x3F);
+
+        const auto byteField = [&](const char* key) -> uint8
+        {
+            return static_cast<uint8>(std::min<uint32>(chocobo.get_or<uint32>(key, 0), 0xFF));
         };
 
-        PChar->m_FieldChocobo = newChocobo.properties;
-        PChar->m_mountId      = 0;
-        db::preparedStmt("UPDATE char_pet SET field_chocobo = ? WHERE charid = ?", PChar->m_FieldChocobo, PChar->id);
+        auto& userData                 = PChar->m_chocoboUserData;
+        userData.fieldChocobo          = newChocobo.properties;
+        userData.registeredAbility1    = byteField("ability1");
+        userData.registeredAbility2    = byteField("ability2");
+        userData.registeredStrength    = byteField("strength");
+        userData.registeredEndurance   = byteField("endurance");
+        userData.registeredDiscernment = byteField("discernment");
+        userData.registeredReceptivity = byteField("receptivity");
+        userData.registeredWeather     = byteField("weather");
+        userData.silksSpeedBonus       = byteField("silksSpeedBonus");
+
+        PChar->m_mountId = 0;
+        saveChocoboUserData(PChar);
         return;
     }
 
-    ShowWarning("Invalid Entity (PC: %s) calling function.", m_PBaseEntity->getName());
+    ShowWarning("CLuaBaseEntity::registerChocobo() - Entity is null, or not PC.");
+}
+
+/************************************************************************
+ *  Function: getFieldChocobo()
+ *  Purpose : Returns the registered chocobo's appearance, speed and minutes
+ *  Example : local chocobo = player:getFieldChocobo()
+ *  Notes   : Returns nil when no chocobo is registered
+ ************************************************************************/
+
+auto CLuaBaseEntity::getFieldChocobo() const -> sol::object
+{
+    const auto* PChar = dynamic_cast<const CCharEntity*>(m_PBaseEntity);
+    if (!PChar)
+    {
+        ShowWarning("CLuaBaseEntity::getFieldChocobo() - Entity is null, or not PC.");
+        return sol::lua_nil;
+    }
+
+    if (!PChar->m_chocoboUserData.fieldChocobo)
+    {
+        return sol::lua_nil;
+    }
+
+    const auto chocobo = ChocoboCustomProperties{ .properties = PChar->m_chocoboUserData.fieldChocobo };
+
+    auto table           = lua.create_table();
+    table["color"]       = static_cast<uint8>(chocobo.color);
+    table["largeBeak"]   = static_cast<bool>(chocobo.largeBeak);
+    table["fullTail"]    = static_cast<bool>(chocobo.fullTail);
+    table["largeTalons"] = static_cast<bool>(chocobo.largeTalons);
+    table["speed"]       = static_cast<uint8>(chocobo.speed);
+    table["minutes"]     = static_cast<uint8>(chocobo.minutes);
+    table["properties"]  = PChar->m_chocoboUserData.fieldChocobo;
+
+    return table;
+}
+
+/************************************************************************
+ *  Function: getChocoboUserData()
+ *  Purpose : Returns the chocobo raising state that outlives any one chocobo
+ *  Example : local raised = player:getChocoboUserData().chocobosRaised
+ *  Notes   :
+ ************************************************************************/
+
+auto CLuaBaseEntity::getChocoboUserData() const -> sol::object
+{
+    const auto* PChar = dynamic_cast<const CCharEntity*>(m_PBaseEntity);
+    if (!PChar)
+    {
+        ShowWarning("CLuaBaseEntity::getChocoboUserData() - Entity is null, or not PC.");
+        return sol::lua_nil;
+    }
+
+    const auto& data = PChar->m_chocoboUserData;
+
+    auto table                     = lua.create_table();
+    table["flags"]                 = data.flags;
+    table["chocobosRaised"]        = data.chocobosRaised;
+    table["registeredAbility1"]    = data.registeredAbility1;
+    table["registeredAbility2"]    = data.registeredAbility2;
+    table["registeredStrength"]    = data.registeredStrength;
+    table["registeredEndurance"]   = data.registeredEndurance;
+    table["registeredDiscernment"] = data.registeredDiscernment;
+    table["registeredReceptivity"] = data.registeredReceptivity;
+    table["registeredWeather"]     = data.registeredWeather;
+    table["silksSpeedBonus"]       = data.silksSpeedBonus;
+
+    return table;
+}
+
+/************************************************************************
+ *  Function: setChocoboUserData()
+ *  Purpose : Sets the chocobo raising flags and the count of chocobos raised
+ *  Example : player:setChocoboUserData({ flags = flags })
+ *  Notes   : registerChocobo writes the registered chocobo. Fields left out keep their values.
+ ************************************************************************/
+
+void CLuaBaseEntity::setChocoboUserData(const sol::table& data) const
+{
+    auto* PChar = dynamic_cast<CCharEntity*>(m_PBaseEntity);
+    if (!PChar)
+    {
+        ShowWarning("CLuaBaseEntity::setChocoboUserData() - Entity is null, or not PC.");
+        return;
+    }
+
+    auto& userData = PChar->m_chocoboUserData;
+
+    userData.flags          = data.get_or<uint32>("flags", userData.flags);
+    userData.chocobosRaised = static_cast<uint16>(std::min<uint32>(data.get_or<uint32>("chocobosRaised", userData.chocobosRaised), 0xFFFF));
+
+    saveChocoboUserData(PChar);
 }
 
 /************************************************************************
@@ -20133,13 +20282,13 @@ uint32 CLuaBaseEntity::getHistory(uint8 index)
 
 auto CLuaBaseEntity::getChocoboRaisingInfo() -> sol::table
 {
-    ShowDebug("Getting Raising Chocobo Info (%s)", m_PBaseEntity->name);
-
-    if (m_PBaseEntity->objtype != TYPE_PC)
+    if (m_PBaseEntity == nullptr || m_PBaseEntity->objtype != TYPE_PC)
     {
-        ShowDebug("Called on invalid entity");
+        ShowWarning("CLuaBaseEntity::getChocoboRaisingInfo() - Entity is null, or not PC.");
         return sol::lua_nil;
     }
+
+    ShowDebugFmt("Getting Raising Chocobo Info ({})", m_PBaseEntity->getName());
 
     // Check to see if the user already has a chocobo
     {
@@ -20170,7 +20319,10 @@ auto CLuaBaseEntity::getChocoboRaisingInfo() -> sol::table
                             "weather_preference, "
                             "hunger, "
                             "care_plan, "
-                            "held_item "
+                            "held_item, "
+                            "locked_plan, "
+                            "appearance, "
+                            "walk_progress "
                             "FROM char_chocobos WHERE charid = ? LIMIT 1";
 
         const auto rset = db::preparedStmt(Query, m_PBaseEntity->id);
@@ -20222,6 +20374,10 @@ auto CLuaBaseEntity::getChocoboRaisingInfo() -> sol::table
             table["care_plan"] = rset->get<uint32>("care_plan");
             table["held_item"] = rset->get<uint32>("held_item");
 
+            table["locked_plan"]   = rset->get<uint32>("locked_plan");
+            table["appearance"]    = rset->get<uint32>("appearance");
+            table["walk_progress"] = rset->get<uint32>("walk_progress");
+
             return table;
         }
     }
@@ -20231,13 +20387,13 @@ auto CLuaBaseEntity::getChocoboRaisingInfo() -> sol::table
 
 bool CLuaBaseEntity::setChocoboRaisingInfo(const sol::table& table)
 {
-    ShowDebug("Setting Raising Chocobo Info (%s)", m_PBaseEntity->name);
-
-    if (m_PBaseEntity->objtype != TYPE_PC)
+    if (m_PBaseEntity == nullptr || m_PBaseEntity->objtype != TYPE_PC)
     {
-        ShowDebug("Called on invalid entity");
+        ShowWarning("CLuaBaseEntity::setChocoboRaisingInfo() - Entity is null, or not PC.");
         return false;
     }
+
+    ShowDebugFmt("Setting Raising Chocobo Info ({})", m_PBaseEntity->getName());
 
     const char* Query = "INSERT INTO char_chocobos SET "
                         "charid = ?, "
@@ -20266,7 +20422,10 @@ bool CLuaBaseEntity::setChocoboRaisingInfo(const sol::table& table)
                         "weather_preference = ?, "
                         "hunger = ?, "
                         "care_plan = ?, "
-                        "held_item = ? "
+                        "held_item = ?, "
+                        "locked_plan = ?, "
+                        "appearance = ?, "
+                        "walk_progress = ? "
                         "ON DUPLICATE KEY UPDATE "
                         "first_name = VALUES(first_name), "
                         "last_name = VALUES(last_name), "
@@ -20293,7 +20452,10 @@ bool CLuaBaseEntity::setChocoboRaisingInfo(const sol::table& table)
                         "weather_preference = VALUES(weather_preference), "
                         "hunger = VALUES(hunger), "
                         "care_plan = VALUES(care_plan), "
-                        "held_item = VALUES(held_item);";
+                        "held_item = VALUES(held_item), "
+                        "locked_plan = VALUES(locked_plan), "
+                        "appearance = VALUES(appearance), "
+                        "walk_progress = VALUES(walk_progress)";
 
     const auto rset = db::preparedStmt(
         Query,
@@ -20323,7 +20485,10 @@ bool CLuaBaseEntity::setChocoboRaisingInfo(const sol::table& table)
         table.get_or<uint32>("weather_preference", 0),
         table.get_or<uint32>("hunger", 0),
         table.get_or<uint32>("care_plan", 0),
-        table.get_or<uint32>("held_item", 0));
+        table.get_or<uint32>("held_item", 0),
+        table.get_or<uint32>("locked_plan", 0),
+        table.get_or<uint32>("appearance", 0),
+        table.get_or<uint32>("walk_progress", 0));
 
     if (!rset)
     {
@@ -20336,13 +20501,13 @@ bool CLuaBaseEntity::setChocoboRaisingInfo(const sol::table& table)
 
 bool CLuaBaseEntity::deleteRaisedChocobo()
 {
-    ShowDebug("Deleting Raising Chocobo (%s)", m_PBaseEntity->name);
-
-    if (m_PBaseEntity->objtype != TYPE_PC)
+    if (m_PBaseEntity == nullptr || m_PBaseEntity->objtype != TYPE_PC)
     {
-        ShowDebug("Called on invalid entity");
+        ShowWarning("CLuaBaseEntity::deleteRaisedChocobo() - Entity is null, or not PC.");
         return false;
     }
+
+    ShowDebugFmt("Deleting Raising Chocobo ({})", m_PBaseEntity->getName());
 
     const auto rset = db::preparedStmt("DELETE FROM char_chocobos WHERE charid = ? LIMIT 1", m_PBaseEntity->id);
     if (!rset)
@@ -21261,6 +21426,9 @@ void CLuaBaseEntity::Register()
     SOL_REGISTER("getPetName", CLuaBaseEntity::getPetName);
     SOL_REGISTER("setPetName", CLuaBaseEntity::setPetName);
     SOL_REGISTER("registerChocobo", CLuaBaseEntity::registerChocobo);
+    SOL_REGISTER("getFieldChocobo", CLuaBaseEntity::getFieldChocobo);
+    SOL_REGISTER("getChocoboUserData", CLuaBaseEntity::getChocoboUserData);
+    SOL_REGISTER("setChocoboUserData", CLuaBaseEntity::setChocoboUserData);
 
     SOL_REGISTER("petAttack", CLuaBaseEntity::petAttack);
     SOL_REGISTER("petAbility", CLuaBaseEntity::petAbility);

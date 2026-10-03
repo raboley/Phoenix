@@ -183,7 +183,7 @@ int32 MapNetworking::map_decipher_packet(uint8* buff, size_t buffsize, MapSessio
     // We can fail to decipher if the client is attempting to zone.
     if (PSession->blowfish.status != BLOWFISH_PENDING_ZONE)
     {
-        ShowError(fmt::format("map_decipher_packet: bad packet from <{}>", ip2str(ip)));
+        ShowError(fmt::format("map_decipher_packet: bad packet from <{}> (charid {})", ip2str(ip), PSession->charID));
     }
 
     return -1;
@@ -265,24 +265,23 @@ int32 MapNetworking::recv_parse(uint8* buff, size_t* buffsize, MapSession*& PSes
                 PSession = mapSessions_.createSession(ipp);
                 if (PSession == nullptr)
                 {
-                    // TODO: err msg?
+                    ShowWarningFmt("recv_parse: 0x00A for charid {} from {} rejected, no login session from this address", packetCharID, ipp.toString());
                     return -1;
                 }
             }
             else
             {
-                if (const auto* existingSession = mapSessions_.getSessionByCharId(packetCharID))
+                // unknown00 goes up by one on every client retry
+                if (const auto* existing = mapSessions_.getSessionByCharId(packetCharID))
                 {
-                    DebugSocketsFmt("Rejecting 0x00A for char {} from {}: no pending session; existing endpoint {} has pending-zone state {}",
-                                    packetCharID,
-                                    ipp.toString(),
-                                    existingSession->client_ipp.toString(),
-                                    existingSession->blowfish.status == BLOWFISH_PENDING_ZONE);
+                    const auto zoning = existing->blowfish.status == BLOWFISH_PENDING_ZONE;
+                    ShowWarningFmt("recv_parse: 0x00A for charid {} from {} ignored, session is bound to {} (pending zone: {}, retry {})", packetCharID, ipp.toString(), existing->client_ipp.toString(), zoning, loginPacket.unknown00);
                 }
                 else
                 {
-                    DebugSocketsFmt("Rejecting 0x00A for char {} from {}: no pending or existing session", packetCharID, ipp.toString());
+                    ShowWarningFmt("recv_parse: 0x00A for charid {} from {} ignored, no session or pending session (retry {})", packetCharID, ipp.toString(), loginPacket.unknown00);
                 }
+
                 return -1;
             }
         }

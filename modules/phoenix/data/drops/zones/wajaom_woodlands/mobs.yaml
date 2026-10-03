@@ -1,0 +1,56 @@
+# Remove Plumbago (March 23, 2010 Alexander quests), and Blue Mage's and Puppetmaster's Testimony from
+# the Mamool Ja and trolls they were added to (June 14, 2012).
+# Plumbago: https://www.playonline.com/pcd/verup/ff11us/detail/5338/detail.html
+# Testimonies: https://forum.square-enix.com/ffxi/threads/24155
+# Pre-2012 droppers: https://wiki.ffo.jp/html/14493.html (Blue Mage), https://wiki.ffo.jp/html/14495.html (Puppetmaster)
+
+templates:
+  Mamool_Ja_Savant:
+    loot:
+      drops:
+        - chance: uncommon
+          item:   mamook_tanscale_key
+        - chance: very_rare
+          item:   mamool_ja_collar
+  Mamool_Ja_Sophist:
+    loot:
+      drops:
+        - chance: uncommon
+          item:   mamook_tanscale_key
+        - chance: very_rare
+          item:   mamool_ja_collar
+  Mamool_Ja_Zenist:
+    loot:
+      drops:
+        - chance: uncommon
+          item:   mamook_tanscale_key
+        - chance: very_rare
+          item:   mamool_ja_helmet
+  Woodtroll_Dark_Knight:
+    loot:
+      drops:
+        - chance: rare
+          item:   halvung_brass_key
+        - chance: very_rare
+          item:   troll_vambrace
+  Woodtroll_Monk:
+    loot:
+      drops:
+        - chance: rare
+          item:   halvung_brass_key
+        - chance: very_rare
+          item:   troll_pauldron
+  Woodtroll_Ranger:
+    loot:
+      drops:
+        - chance: rare
+          item:   halvung_brass_key
+        - chance: very_rare
+          item:   troll_pauldron
+  Woodtroll_Warrior:
+    loot:
+      drops:
+        - chance: rare
+          item:   halvung_brass_key
+        - chance: very_rare
+          item:   troll_vambrace

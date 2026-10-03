@@ -58,6 +58,7 @@
 #include "utils/fishingutils.h"
 #include "utils/messageutils.h"
 #include "utils/mobutils.h"
+#include "utils/mountutils.h"
 #include "utils/petutils.h"
 #include "utils/puppetutils.h"
 #include "utils/zoneutils.h"
@@ -241,8 +242,16 @@ void CBattleEntity::UpdateHealth()
 
     // Calculate "base" hp/mp with weakness, curse, HP mods. Raw HP/MP mods from food are post-curse.
     // Note: Afflictor was noted to use exactly 75/256 for curse power
-    int32 baseHPBonus = std::floor((std::floor((health.maxhp + getMod(xi::Mod::BASE_HP)) * weaknessPower) + getMod(xi::Mod::HP)) * cursePower) + getMod(xi::Mod::FOOD_HP);
-    int32 baseMPBonus = std::floor((std::floor((health.maxmp + getMod(xi::Mod::BASE_MP)) * weaknessPower) + getMod(xi::Mod::MP)) * cursePower) + getMod(xi::Mod::FOOD_MP);
+    int32 baseHPBonus = std::floor((std::floor((health.maxhp + getMod(xi::Mod::BASE_HP)) * weaknessPower) + getMod(xi::Mod::HP)) * cursePower);
+    int32 baseMPBonus = std::floor((std::floor((health.maxmp + getMod(xi::Mod::BASE_MP)) * weaknessPower) + getMod(xi::Mod::MP)) * cursePower);
+
+    // Store base HP/MP Bonus for HP/MP% latents here
+    health.latenthp = baseHPBonus;
+    health.latentmp = baseMPBonus;
+
+    // add in food
+    baseHPBonus += getMod(xi::Mod::FOOD_HP);
+    baseMPBonus += getMod(xi::Mod::FOOD_MP);
 
     // Resolve HP/MP conversion
     int32 HPMPConvertDiff = getMod(xi::Mod::CONVMPTOHP) - getMod(xi::Mod::CONVHPTOMP);
@@ -343,6 +352,12 @@ uint8 CBattleEntity::UpdateSpeed(bool run)
     if (isMounted())
     {
         outputSpeed = settings::get<uint8>("map.MOUNT_SPEED") / 2;
+
+        if (const auto* PChar = dynamic_cast<const CCharEntity*>(this); PChar && mountutils::isPersonalChocobo(PChar))
+        {
+            outputSpeed = mountutils::personalChocoboSpeed(PChar) / 2;
+        }
+
         outputSpeed *= 1.0f + static_cast<float>(getMod(xi::Mod::MOUNT_MOVE)) / 100.0f;
     }
     else if (baseSpeed == 0 || getMod(xi::Mod::MOVE_SPEED_OVERRIDE) < 0)
@@ -534,7 +549,7 @@ auto CBattleEntity::GetWeaponDelay(bool tp) -> uint32
 
                 hasteMagic   = std::clamp<float>(hasteMagic, -1.0f, 0.4375f);
                 hasteAbility = std::clamp<float>(hasteAbility, -0.25f, 0.25f);
-                hasteGear    = std::clamp<float>(hasteGear, -0.25f, 0.25f);
+                hasteGear    = std::min(hasteGear, 0.25f);
 
                 float hasteCap  = 1.0f - settings::get<float>("main.DELAY_REDUCTION_CAP");
                 hasteMultiplier = std::clamp<float>(1.0f - hasteMagic - hasteAbility - hasteGear, hasteCap, 2.0f);
@@ -2354,9 +2369,19 @@ void CBattleEntity::OnCastFinished(CMagicState& state, action_t& action)
         flags |= FINDFLAGS_DEAD;
     }
 
-    const auto     result    = luautils::callGlobal<sol::table>("xi.combat.magicAoE.calculateTypeAndRadius", this, PSpell);
-    const SPELLAOE aoeType   = result.get_or(1, SPELLAOE_NONE);
-    const float    aoeRadius = result.get_or(2, 0.0f);
+    const auto result    = luautils::callGlobal<sol::table>("xi.combat.magicAoE.calculateTypeAndRadius", this, PSpell);
+    SPELLAOE   aoeType   = result.get_or(1, SPELLAOE_NONE);
+    float      aoeRadius = result.get_or(2, 0.0f);
+
+    // Convergence reduces AoEs to a single target
+    // TODO: there isn't a good way to pick out which spells are supposed to be compatible with convergence
+    // So you could accidentally use Battle Dance with Convergence and lose AoE for no bonus
+    if (PSpell->getSpellGroup() == SPELLGROUP_BLUE && StatusEffectContainer->HasStatusEffect(xi::StatusEffect::Convergence))
+    {
+        aoeType   = SPELLAOE_NONE;
+        aoeRadius = 0.0f;
+    }
+
     switch (aoeType)
     {
         case SPELLAOE_RADIAL:
@@ -2421,7 +2446,7 @@ void CBattleEntity::OnCastFinished(CMagicState& state, action_t& action)
 
         // TODO: this is really hacky and should eventually be moved into lua, and spellFlags should probably be in the spells table..
         // Also need to have IsAbsorbByShadow last in conditional because that has side effects including removing a shadow
-        if (PSpell->canHitShadow() && aoeType == SPELLAOE_NONE && !(PSpell->getFlag() & SPELLFLAG_IGNORE_SHADOWS) && battleutils::IsAbsorbByShadow(PTarget, this))
+        if (PSpell->getSpellGroup() != SPELLGROUP_BLUE && PSpell->canHitShadow() && aoeType == SPELLAOE_NONE && !(PSpell->getFlag() & SPELLFLAG_IGNORE_SHADOWS) && battleutils::IsAbsorbByShadow(PTarget, this))
         {
             // take shadow
             msg                = MsgBasic::ShadowAbsorb;
@@ -3898,6 +3923,8 @@ bool CBattleEntity::OnAttack(CAttackState& state, action_t& action)
     // End of attack loop
     /////////////////////////////////////////////////////////////////////////////////////////////
 
+    // Boost lasts the entire attack around
+    this->StatusEffectContainer->DelStatusEffectSilent(xi::StatusEffect::Boost);
     this->StatusEffectContainer->DelStatusEffectsByFlag(xi::StatusEffectFlag::Detectable);
     this->processActionEffectFlags(action);
 

@@ -23,7 +23,7 @@ local column =
 }
 
 -- Table variables.
-local pTable =
+xi.spells.enhancing.spellPTable = -- PHOENIX OVERRIDE. TODO: Revert if magic tables are exposed on LSB
 {
 --                                     1     2            3            4           5              6          7                 8
 -- Structure:            [spellId] = { Tier, Main_Effect, Spell_Level, Base_Power, Base_Duration, Composure, Always_Overwrite, Tick_Seconds },
@@ -191,6 +191,8 @@ local pTable =
     [xi.magic.spell.TEMPER       ] = { 1, xi.effect.MULTI_STRIKES, 95,    5,  180, true,  false, 0 },
     [xi.magic.spell.TEMPER_II    ] = { 2, xi.effect.MULTI_STRIKES, 99,    5,  180, true,  false, 0 },
 }
+
+local pTable = xi.spells.enhancing.spellPTable -- PHOENIX OVERRIDE. TODO: Revert if magic tables are exposed on LSB
 
 -- Enhancing Spell Base Potency function.
 xi.spells.enhancing.calculateEnhancingBasePower = function(caster, target, spell, spellId, spellEffect)
@@ -443,6 +445,15 @@ xi.spells.enhancing.calculateEnhancingDuration = function(caster, target, spell,
         (spellEffect >= xi.effect.ENFIRE_II and spellEffect <= xi.effect.ENWATER_II)
     then
         duration = duration + target:getMod(xi.mod.ENSPELL_DURATION)
+
+    -- Bar-element spells cast by mobs wear after 150s: Hilltroll Red Mages re-applied Barwater at a 152s floor over 408 casts (Retail data)
+    -- This means mobs use the old durations for certain spells
+    elseif
+        caster:isMob() and
+        spellEffect >= xi.effect.BARFIRE and
+        spellEffect <= xi.effect.BARWATER
+    then
+        duration = 150
     end
 
     --------------------

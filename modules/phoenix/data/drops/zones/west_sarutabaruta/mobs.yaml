@@ -1,0 +1,37 @@
+# Remove Skull Locust, added to Yagudo monks in the March 23, 2010 update.
+# Source: https://www.playonline.com/pcd/verup/ff11us/detail/5338/detail.html
+
+templates:
+  Yagudo_Initiate:
+    loot:
+      drops:
+        - chance: common
+          item:   yagudo_feather
+        - chance: common
+          item:   yagudo_feather
+        - chance: uncommon
+          item:   yagudo_feather
+        - chance: uncommon
+          item:   yagudo_feather
+        - chance: uncommon
+          item:   yagudo_bead_necklace
+
+  Yagudo_Acolyte:
+    loot:
+      drops:
+        - chance: common
+          item:   yagudo_feather
+        - chance: common
+          item:   yagudo_feather
+        - chance: common
+          item:   yagudo_feather
+        - chance: common
+          item:   yagudo_feather
+        - chance: common
+          item:   yagudo_bead_necklace
+        - chance: uncommon
+          one_of:
+            - scroll_of_paralyze
+            - scroll_of_protectra
+            - scroll_of_barsleep
+            - scroll_of_sneak
