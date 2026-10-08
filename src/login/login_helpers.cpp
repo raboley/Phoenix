@@ -543,6 +543,16 @@ uint16 generateFeatureBitmask(const bool& needsOTP)
     return mask;
 }
 
+auto nextClientCharacterId(const uint32 currentMaximum, const uint32 configuredStart) -> Maybe<uint32>
+{
+    if (currentMaximum >= MaxClientCharacterId || configuredStart == 0 || configuredStart > MaxClientCharacterId)
+    {
+        return std::nullopt;
+    }
+
+    return std::max(currentMaximum + 1, configuredStart);
+}
+
 int32 saveCharacter(uint32 accid, uint32 charid, char_mini* createchar)
 {
     const auto charName = asStringFromUntrustedSource(createchar->m_name);
@@ -697,19 +707,29 @@ int32 createCharacter(session_t& session, uint8* buf, lpkt_chr_info_sub2& charIn
         }
     }
 
-    const auto rset = db::preparedStmt("SELECT COALESCE(MAX(charid), 0) AS max_id FROM chars");
+    const auto rset = db::preparedStmt(
+        "SELECT COALESCE(MAX(charid), 0) AS max_id FROM chars WHERE charid <= ?",
+        MaxClientCharacterId);
     if (!rset)
     {
         return -1;
     }
 
-    uint32 charID = 0;
+    Maybe<uint32> charID;
     if (rset->rowsCount() != 0 && rset->next())
     {
-        charID = rset->get<uint32>("max_id") + 1;
+        charID = nextClientCharacterId(
+            rset->get<uint32>("max_id"),
+            settings::get<uint32>("login.CHARACTER_ID_START"));
     }
 
-    if (saveCharacter(session.accountID, charID, &createchar) == -1)
+    if (!charID.has_value())
+    {
+        ShowError(fmt::format("Cannot create character {}: the FFXI 24-bit character ID range is exhausted", charName));
+        return -1;
+    }
+
+    if (saveCharacter(session.accountID, *charID, &createchar) == -1)
     {
         return -1;
     }
@@ -719,9 +739,9 @@ int32 createCharacter(session_t& session, uint8* buf, lpkt_chr_info_sub2& charIn
     std::memcpy(&charInfo.character_name, charName.c_str(), std::min(charName.size(), sizeof(charInfo.character_name)));
 
     uint8  worldId     = 0;      // Use when multiple worlds are supported.
-    uint32 contentId   = charID; // Reusing the character ID as the content ID (which is also the name of character folder within the USER directory) at the moment
-    uint16 charIdMain  = charID & 0xFFFF;
-    uint8  charIdExtra = (charID >> 16) & 0xFF;
+    uint32 contentId   = *charID; // Reusing the character ID as the content ID (which is also the name of character folder within the USER directory) at the moment
+    uint16 charIdMain  = *charID & 0xFFFF;
+    uint8  charIdExtra = (*charID >> 16) & 0xFF;
 
     charInfo.ffxi_id           = contentId;
     charInfo.ffxi_id_world     = charIdMain;

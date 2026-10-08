@@ -27,6 +27,7 @@
 #include "data/enums/key_item.h"
 #include "items/item.h"
 
+#include <functional>
 #include <map>
 
 enum class GP_CLI_COMMAND_FISHING_2_MODE : uint8_t;
@@ -526,6 +527,7 @@ enum FISHMESSAGEOFFSET : uint8
     FISHMESSAGEOFFSET_LOST_TOOBIG              = 0x3C, // You lost your catch. Whatever caught the hook was too large to catch with this rod.
     FISHMESSAGEOFFSET_GIVEUP_BAITLOSS          = 0x24, // You give up and reel in your line.
     FISHMESSAGEOFFSET_GIVEUP                   = 0x25, // You give up.
+    FISHMESSAGEOFFSET_CATCH_GIL                = 0x26, // <Player> obtains <number> gil.
     FISHMESSAGEOFFSET_CATCH                    = 0x27, // <Player> caught <Fish>
     FISHMESSAGEOFFSET_CATCH_MULTI              = 0x0E, // <Player> caught X <Fish>
     FISHMESSAGEOFFSET_CATCH_INV_FULL           = 0x0A, // <Player> caught <Fish>, but cannot carry any more items. ≺Player≻ regretfully releases the <Fish>
@@ -915,6 +917,32 @@ using BigFish                 = xi::Flag<struct BigFishTag>;
 using CancelOnMobLoadFailBait = xi::Flag<struct CancelOnMobLoadFailBaitTag>;
 using Lost                    = xi::Flag<struct LostTag>;
 
+// The daily allowance lives on the account, which only a module knows how to reach. It hands
+// these in at startup, and without them an angler is never held back
+using AccountMeterFetch   = std::function<int32(uint32 accountId, const std::string& varName)>;
+using AccountMeterPersist = std::function<void(uint32 accountId, const std::string& varName, int32 value, uint32 expiry)>;
+
+void SetAccountMeterAccess(AccountMeterFetch fetch, AccountMeterPersist persist);
+
+enum class FishingEvent : uint8
+{
+    Cast,    // The line went out
+    Hook,    // The fight packet was sent; PChar->hookedFish holds what the client was told
+    End,     // The client ended the fight; para is the stamina it reported
+    Release, // The client finished reeling in and is idle again
+    Landed,  // PChar->hookedFish went into the bag
+};
+
+// Modules hand these in at startup and each hears every step of every cast
+using FishingObserver = std::function<void(const CCharEntity* PChar, FishingEvent event, uint32 para)>;
+
+void AddFishingObserver(FishingObserver observe);
+
+// Fatigue owed for a fish: by size and by how far above the angler it sat; failure adds the certain-loss penalty
+auto RodFatigue(uint16 rodId, int32 fatigue) -> int32;
+auto CatchFatigue(uint8 fishingSkill, const fishresponse_t& hooked) -> int32;
+auto FailedCatchFatigue(uint8 fishingSkill, const fishresponse_t& hooked) -> int32;
+
 // Catch Pools
 void ReduceFishPool(xi::ZoneId zoneId, uint8 areaId, uint16 fishId);
 void RestockFishingAreas();
@@ -937,6 +965,9 @@ uint8               CalculateLuckyTiming(CCharEntity* PChar, uint8 fishingSkill,
 uint16              CalculateHookChance(uint8 fishingSkill, fish_t* fish, bait_t* bait, rod_t* rod);
 uint8               CalculateDelay(CCharEntity* PChar, uint8 baseDelay, uint8 sizeType, rod_t* rod, uint8 count);
 uint8               CalculateMovement(CCharEntity* PChar, uint8 baseMove, uint8 sizeType, rod_t* rod, uint8 count);
+lsbret_t            CalculateLoseChance(uint8 catchType, uint8 fishingSkill, uint8 maxSkill, uint8 sizeType, bool legendary, uint8 ranking, rod_t* rod);
+lsbret_t            CalculateSnapChance(uint8 catchType, uint8 fishingSkill, uint8 maxSkill, uint8 sizeType, bool legendary, uint8 ranking, rod_t* rod);
+lsbret_t            CalculateBreakChance(uint8 catchType, uint8 fishingSkill, uint8 maxSkill, uint8 sizeType, bool legendary, uint8 ranking, rod_t* rod);
 uint8               CalculateFishSense(CCharEntity* PChar, fishresponse_t* response, uint8 fishingSkill, uint8 catchType, uint8 sizeType, uint8 maxSkill, Legendary legendary, uint16 minLength, uint16 maxLength, uint8 ranking, rod_t* rod);
 uint16              CalculateCriticalBite(uint8 fishingSkill, uint8 fishSkill, rod_t* rod);
 big_fish_stats_t    CalculateBigFishStats(uint16 minLength, uint16 maxLength);
@@ -983,6 +1014,8 @@ void FishingSkillup(CCharEntity* PChar, uint8 catchLevel, uint8 successType);
 
 // Fishing
 void             InterruptFishing(CCharEntity* PChar);
+void             AbandonHook(CCharEntity* PChar);
+void             ReleaseFishing(CCharEntity* PChar);
 void             StartFishing(CCharEntity* PChar);
 void             ReelInCatch(CCharEntity* PChar);
 uint8            UnhookMob(CCharEntity* PChar, Lost lost);

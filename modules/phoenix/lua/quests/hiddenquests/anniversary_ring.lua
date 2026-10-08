@@ -5,7 +5,7 @@
 -----------------------------------
 require('modules/module_utils')
 -----------------------------------
-local m = Module:new('anniversary_ring')
+local m = Module:new('anniversary_ring', xi.settings.main.ENABLE_NEW_CHARACTER_ANNIVERSARY_RING == true)
 
 local introEvents =
 {

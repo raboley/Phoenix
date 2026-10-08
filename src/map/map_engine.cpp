@@ -142,12 +142,16 @@ auto MapEngine::init() -> Task<void>
 
     luautils::init(mapIPP, config_.inCI); // Also calls moduleutils::LoadLuaModules();
 
-    // Delete sessions that are associated with this map process, but leave others alone
-    db::preparedStmt("DELETE FROM accounts_sessions WHERE IF(? = 0 AND ? = 0, true, server_addr = ? AND server_port = ?)",
-                     mapIPP.getIP(),
-                     mapIPP.getPort(),
-                     mapIPP.getIP(),
-                     mapIPP.getPort());
+    // The test engine has no owned map listener. Its zero endpoint would match
+    // every live session, so never perform production session cleanup from it.
+    if (!config_.isTestServer)
+    {
+        db::preparedStmt("DELETE FROM accounts_sessions WHERE IF(? = 0 AND ? = 0, true, server_addr = ? AND server_port = ?)",
+                         mapIPP.getIP(),
+                         mapIPP.getPort(),
+                         mapIPP.getIP(),
+                         mapIPP.getPort());
+    }
 
     ShowInfo("do_init: zlib is reading");
     zlib_init();

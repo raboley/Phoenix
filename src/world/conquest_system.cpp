@@ -237,6 +237,10 @@ void ConquestSystem::updateWeekConquest()
         ShowError("updateWeekConquest: no influence rows returned");
     }
 
+    // A region no one strictly wins keeps its current owner instead of falling to neutral.
+    // Without this, a week with no influence earned leaves every region unowned.
+    const auto previousControls = getRegionControls();
+
     for (uint8 regionId = 0; regionId < influences.size(); ++regionId)
     {
         const auto& influence = influences[regionId];
@@ -246,7 +250,7 @@ void ConquestSystem::updateWeekConquest()
         const int32 windurst = influence.windurst_influence;
         const int32 beastmen = ConquestData::CalculateBeastmenInfluence(static_cast<REGION_TYPE>(regionId), influence);
 
-        uint8 control = NATION_NEUTRAL;
+        uint8 control = regionId < previousControls.size() ? previousControls[regionId].current : static_cast<uint8>(NATION_NEUTRAL);
         if (sandoria > bastok && sandoria > windurst && sandoria > beastmen)
         {
             control = NATION_SANDORIA;
@@ -316,7 +320,7 @@ auto ConquestSystem::getRegionalInfluences() -> std::vector<influence_t> const
 
 auto ConquestSystem::getRegionControls() -> std::vector<region_control_t> const
 {
-    const auto rset = db::preparedStmt("SELECT region_control, region_control_prev FROM conquest_system");
+    const auto rset = db::preparedStmt("SELECT region_control, region_control_prev FROM conquest_system ORDER BY region_id");
 
     std::vector<region_control_t> controllers;
     if (rset && rset->rowsCount())

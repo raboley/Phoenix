@@ -42,6 +42,7 @@ public:
     auto getSessionByChar(CCharEntity* PChar) -> MapSession*;
     auto getSessionByCharId(uint32 charId) -> MapSession*;
     auto getPendingSessionByCharId(uint32 charId) -> MapSession*;
+    auto rebindZoningSession(uint32 charId, const IPP& ipp) -> MapSession*;
     auto getSessionByAccountId(uint32 accountId) -> MapSession*;
     auto getSessionByCharName(const std::string& name) -> MapSession*;
 
@@ -53,7 +54,10 @@ public:
     void destroyPendingSession(uint32 charId);
 
 private:
-    Scheduler&                                    scheduler_;
-    std::map<IPP, std::unique_ptr<MapSession>>    sessions_;         // Confirmed sessions mapped by IP
-    std::map<uint32, std::unique_ptr<MapSession>> pending_sessions_; // Pending sessions notified via IPC that a character may be arriving
+    friend struct MapSessionContainerTestAccess;
+
+    Scheduler&                                  scheduler_;
+    std::map<IPP, std::unique_ptr<MapSession>>    sessions_;           // Confirmed sessions mapped by IP
+    std::map<uint32, std::unique_ptr<MapSession>> pending_sessions_;   // Pending sessions notified via IPC that a character may be arriving
+    std::map<uint32, std::unique_ptr<MapSession>> displaced_sessions_; // Zoning sessions whose old UDP endpoint was claimed by another zoning client
 };

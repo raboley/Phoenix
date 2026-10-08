@@ -22,14 +22,19 @@
 #include "data/enums/detects.h"
 #include "map/data/datasets/ecosystems/dataset.h"
 #include "map/data/datasets/status_effects/dataset.h"
+#include "map/data/datasets/zones/mobs/dataset.h"
+#include "map/data/datasets/zones/npcs/dataset.h"
 #include "map/data/yaml/merge.h"
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <string>
 #include <vector>
 
 using EcosystemsDataset   = xi::data::datasets::ecosystems::Dataset;
+using MobsDataset         = xi::data::datasets::zones::mobs::Dataset;
+using NpcsDataset         = xi::data::datasets::zones::npcs::Dataset;
 using StatusEffectDataset = xi::data::datasets::status_effects::Dataset;
 
 TEST_CASE("data binding: modules keep sparse-map and list-replacement semantics", "[data][binding]")
@@ -80,6 +85,62 @@ ecosystems:
     CHECK(attributes.Element == xi::Element::Fire);
     CHECK(attributes.Detects == xi::Detects::Hearing);
     CHECK(attributes.Speed == 32);
+}
+
+TEST_CASE("data binding: zone patches preserve numeric mapping keys", "[data][binding]")
+{
+    const std::vector<std::string> modules{
+        "modules/era/data/abyssea/advanced_job_quest_mob_stats/zones/korroloka_tunnel/mobs.yaml"
+    };
+    const auto records = MobsDataset::decode(xi::data::loadPatchedZoneYaml("data/zones/korroloka_tunnel/mobs.yaml", modules));
+
+    for (const auto id : { 17486187U, 17486188U, 17486189U })
+    {
+        const auto patched = std::ranges::find(records.Spawns, id, &xi::data::MobSpawnData::Id);
+        REQUIRE(patched != records.Spawns.end());
+        CHECK(patched->MinLevel == 32);
+        CHECK(patched->MaxLevel == 32);
+    }
+
+    const auto& attributes = records.Templates.at("Korroloka_Leech").Attributes;
+    REQUIRE(attributes.Stats.has_value());
+    CHECK(attributes.Stats->HP == 900);
+}
+
+TEST_CASE("data binding: zone patches accept apostrophes in plain scalars", "[data][binding]")
+{
+    // Regression for https://github.com/stephenberry/glaze/issues/2826, fixed in glaze v9.0.0.
+    const std::string              core = R"(
+npcs:
+  16982179:
+    display_name: Salaheem's Sentinels
+    status: normal
+    render:
+      name_vis: 0
+  16982254:
+    display_name: 'Gate: The Pit'
+    status: normal
+    render:
+      name_vis: 0
+)";
+    const std::vector<std::string> modules{ R"(
+npcs:
+  16982254:
+    status: disappear
+)" };
+
+    const auto records = NpcsDataset::decode(xi::data::patchZoneYaml(core, modules));
+    REQUIRE(records.size() == 2);
+
+    const auto sentinels = std::ranges::find(records, 16982179U, &xi::data::NpcData::Id);
+    REQUIRE(sentinels != records.end());
+    CHECK(sentinels->DisplayName == "Salaheem's Sentinels");
+    CHECK(sentinels->Status == xi::Status::Normal);
+
+    const auto gate = std::ranges::find(records, 16982254U, &xi::data::NpcData::Id);
+    REQUIRE(gate != records.end());
+    CHECK(gate->DisplayName == "Gate: The Pit");
+    CHECK(gate->Status == xi::Status::Disappear);
 }
 
 TEST_CASE("data binding: runtime decoding is strict", "[data][binding]")

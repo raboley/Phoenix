@@ -45,7 +45,7 @@ constexpr uint8 MAX_TRADE_SLOTS = 9;
 auto GP_CLI_COMMAND_ITEM_TRANSFER::validate(MapSession* PSession, const CCharEntity* PChar) const -> PacketValidationResult
 {
     return PacketValidator(PChar)
-        .blockedBy({ BlockedState::InEvent, BlockedState::Monstrosity })
+        .blockedBy({ BlockedState::InEvent, BlockedState::Fishing, BlockedState::Monstrosity })
         .range("ItemNum", this->ItemNum, 1, MAX_TRADE_SLOTS);
 }
 

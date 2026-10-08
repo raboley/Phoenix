@@ -37,6 +37,11 @@ xi.settings.login =
     -- Allow character creation through the lobby (true/false)
     CHARACTER_CREATION = true,
 
+    -- First character ID allocated by the lobby. Use disjoint ranges when one
+    -- FFXI installation connects to multiple private-server profiles because
+    -- the client stores per-character files in a shared USER/<hex id> folder.
+    CHARACTER_ID_START = 1,
+
     -- Number of simultaneous game sessions per IP (0 for no limit)
     LOGIN_LIMIT = 0,
 
