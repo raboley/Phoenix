@@ -54,6 +54,7 @@ private:
     Scheduler&               scheduler_;
     asio::ssl::context       tls_;
     profile::PresenceManager presence_;
+    uint16                   connectionsPerAddress_; // 0 for no limit
     std::map<Peer, uint16>   connections_;
     Maybe<Scheduler::Token>  refreshToken_;
 };

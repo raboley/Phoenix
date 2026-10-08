@@ -39,9 +39,8 @@ namespace
 
 using namespace std::chrono_literals;
 
-constexpr auto   kHandshakeDeadline  = 10s;
-constexpr auto   kRefreshInterval    = 1h;
-constexpr uint16 kConnectionsPerPeer = 16;
+constexpr auto kHandshakeDeadline = 10s;
+constexpr auto kRefreshInterval   = 1h;
 
 // hardcoded in polcore
 constexpr uint16 kIrcPort = 51240;
@@ -51,6 +50,7 @@ constexpr uint16 kIrcPort = 51240;
 ProfileEngine::ProfileEngine(Scheduler& scheduler)
 : scheduler_(scheduler)
 , tls_(asio::ssl::context::tlsv13_server)
+, connectionsPerAddress_(settings::get<uint16>("network.PROFILE_CONNECTIONS_PER_ADDRESS"))
 {
     auto ec = asio::error_code{};
     tls_.set_options(asio::ssl::context::default_workarounds);
@@ -108,8 +108,15 @@ auto ProfileEngine::accept(asio::ip::tcp::acceptor acceptor, const Session sessi
         }
 
         auto peer = Peer{ acceptor.local_endpoint().port(), socket.remote_endpoint(ec).address().to_string() };
-        if (ec || connections_[peer] >= kConnectionsPerPeer)
+        if (ec)
         {
+            continue;
+        }
+
+        // every client behind the address holds one irc connection for as long as it runs
+        if (connectionsPerAddress_ != 0 && connections_[peer] >= connectionsPerAddress_)
+        {
+            ShowWarningFmt("{} refused a connection on port {}: {} are already open (network.PROFILE_CONNECTIONS_PER_ADDRESS)", peer.second, peer.first, connections_[peer]);
             continue;
         }
 

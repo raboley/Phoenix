@@ -30,6 +30,11 @@ xi.settings.network =
 
     PROFILE_PORT = 51220,
 
+    -- Number of simultaneous profile server connections per IP and port (0 for no limit).
+    -- Every running client holds one for as long as it runs, so this also caps
+    -- how many clients one address can have in game at once.
+    PROFILE_CONNECTIONS_PER_ADDRESS = 16,
+
     -- DB queries will attempt each query once, and reconnect and retry up to `SQL_QUERY_RETRY_COUNT` times.
     SQL_QUERY_RETRY_COUNT = 1,
 
