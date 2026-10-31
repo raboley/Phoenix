@@ -7506,6 +7506,12 @@ void removeCharFromZone(CCharEntity* PChar)
         PChar->TradeContainer->Clean();
     }
 
+    // A request still pending dies with this zone: the partner's half goes
+    // too, or it would ignore every later request from this character.
+    if (auto* tradePartner = PChar->tradePartner())
+    {
+        tradePartner->TradePending.clean();
+    }
     PChar->TradePending.clean();
     PChar->InvitePending.clean();
 
