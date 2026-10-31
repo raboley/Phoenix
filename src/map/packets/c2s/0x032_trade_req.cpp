@@ -76,8 +76,17 @@ void GP_CLI_COMMAND_TRADE_REQ::process(MapSession* PSession, CCharEntity* PChar)
 
     if (PTarget->TradePending.entity.UniqueNo == PChar->id)
     {
-        ShowDebugFmt("{} has already sent a trade request to {}", PChar->getName(), PTarget->getName());
-        return;
+        if (PChar->TradePending.entity.UniqueNo == PTarget->id)
+        {
+            ShowDebugFmt("{} has already sent a trade request to {}", PChar->getName(), PTarget->getName());
+            return;
+        }
+
+        // Only the target still remembers a request from this character: this
+        // side's half was cleared by a zone or a new session. Left alone, every
+        // request between the two is ignored until the target zones.
+        ShowDebugFmt("{} cleared a stale trade request from {}", PTarget->getName(), PChar->getName());
+        PTarget->TradePending.clean();
     }
 
     if (PTarget->activePlayerTradeTransaction())
