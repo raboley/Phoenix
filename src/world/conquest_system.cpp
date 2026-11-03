@@ -251,21 +251,29 @@ void ConquestSystem::updateWeekConquest()
         const int32 beastmen = ConquestData::CalculateBeastmenInfluence(static_cast<REGION_TYPE>(regionId), influence);
 
         uint8 control = regionId < previousControls.size() ? previousControls[regionId].current : static_cast<uint8>(NATION_NEUTRAL);
-        if (sandoria > bastok && sandoria > windurst && sandoria > beastmen)
+
+        // A region a nation holds stays that nation's: only a Beastmen-held or neutral
+        // region is contested. Losing one to a quiet week or to its players' home-point
+        // returns closes its outposts, with their warps and home points.
+        const bool heldByNation = control == NATION_SANDORIA || control == NATION_BASTOK || control == NATION_WINDURST;
+        if (!heldByNation)
         {
-            control = NATION_SANDORIA;
-        }
-        else if (bastok > sandoria && bastok > windurst && bastok > beastmen)
-        {
-            control = NATION_BASTOK;
-        }
-        else if (windurst > sandoria && windurst > bastok && windurst > beastmen)
-        {
-            control = NATION_WINDURST;
-        }
-        else if (beastmen > sandoria && beastmen > bastok && beastmen > windurst)
-        {
-            control = NATION_BEASTMEN;
+            if (sandoria > bastok && sandoria > windurst && sandoria > beastmen)
+            {
+                control = NATION_SANDORIA;
+            }
+            else if (bastok > sandoria && bastok > windurst && bastok > beastmen)
+            {
+                control = NATION_BASTOK;
+            }
+            else if (windurst > sandoria && windurst > bastok && windurst > beastmen)
+            {
+                control = NATION_WINDURST;
+            }
+            else if (beastmen > sandoria && beastmen > bastok && beastmen > windurst)
+            {
+                control = NATION_BEASTMEN;
+            }
         }
 
         db::preparedStmt("UPDATE conquest_system SET region_control = ? WHERE region_id = ?", control, regionId);
