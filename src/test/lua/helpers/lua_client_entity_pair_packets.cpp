@@ -30,6 +30,7 @@
 #include "map/map_engine.h"
 #include "map/map_networking.h"
 #include "map/packets/c2s/0x00a_login.h"
+#include "map/packets/c2s/0x01a_action.h"
 #include "map/packets/s2c/0x028_battle2.h"
 #include "map/packets/s2c/0x083_guild_buylist.h"
 #include "packets/c2s/0x011_zone_transition.h"
@@ -103,10 +104,24 @@ void CLuaClientEntityPairPackets::send(const PacketC2S packetId, const sol::obje
  *  Function: sendZonePackets()
  *  Purpose : Send packets for zone transition
  *  Example : packets:sendZonePackets()
- *  Notes   : Handles the zone-in packet sequence
+ *  Notes   : Handles the zone-in packet sequence, ending with the client
+ *            reporting the zone loaded
  ************************************************************************/
 
 void CLuaClientEntityPairPackets::sendZonePackets()
+{
+    sendZoneInPackets();
+    sendResourcesReady();
+}
+
+/************************************************************************
+ *  Function: sendZoneInPackets()
+ *  Purpose : Log the client into its destination zone
+ *  Notes   : The client is left loading the zone: it has not yet
+ *            reported the zone loaded (see sendResourcesReady)
+ ************************************************************************/
+
+void CLuaClientEntityPairPackets::sendZoneInPackets()
 {
     const auto testChar = parent_->testChar();
 
@@ -134,6 +149,25 @@ void CLuaClientEntityPairPackets::sendZonePackets()
     // Execute AfterZoneIn logic
     parent_->simulation()->skipTime(4);
     testChar->entity()->PAI->checkQueueImmediately();
+}
+
+/************************************************************************
+ *  Function: sendResourcesReady()
+ *  Purpose : Report the zone loaded, as a client does when its loading
+ *            screen ends (0x01A SendResRdy)
+ ************************************************************************/
+
+void CLuaClientEntityPairPackets::sendResourcesReady()
+{
+    const auto testChar = parent_->testChar();
+    auto*      entity   = testChar->entity();
+
+    const auto packet = createPacket<GP_CLI_COMMAND_ACTION>();
+    auto*      action = packet->as<GP_CLI_COMMAND_ACTION>();
+    action->UniqueNo  = entity->id;
+    action->ActIndex  = entity->targid;
+    action->ActionID  = GP_CLI_COMMAND_ACTION_ACTIONID::SendResRdy;
+    sendBasicPacket(*packet);
 }
 
 /************************************************************************

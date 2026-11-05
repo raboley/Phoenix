@@ -443,7 +443,13 @@ void CCharEntity::pushPacket(std::unique_ptr<CBasicPacket>&& packet)
 void CCharEntity::updateEntityPacket(CBaseEntity* PEntity, ENTITYUPDATE type, uint8 updatemask)
 {
     auto       itr              = EntityUpdatePackets.find(PEntity->id);
-    const bool hasPendingPacket = itr != EntityUpdatePackets.end() && itr->second != nullptr;
+    const bool hasPendingPacket = itr != EntityUpdatePackets.end() && itr->second != nullptr &&
+                                  // A pending despawn, or one for an index the entity no longer has (a character
+                                  // that zoned out and back in), must reach the client as it is. Merged, it would
+                                  // keep its despawn flag and take the new index: the old index never despawns
+                                  // and the new one never spawns.
+                                  (itr->second->ref<uint8>(0x0A) & 0x20) == 0 &&
+                                  itr->second->ref<uint16>(0x08) == PEntity->targid;
 
     auto* PChar = [&]() -> CCharEntity*
     {
@@ -497,8 +503,15 @@ auto CCharEntity::popPacket() -> std::unique_ptr<CBasicPacket>
         case 0x0D: // Char update
             [[fallthrough]];
         case 0x0E: // Entity update
-            EntityUpdatePackets.erase(PPacket->ref<uint32>(0x04));
+        {
+            // A later packet about the same entity may have replaced this one as the pending one.
+            const auto pending = EntityUpdatePackets.find(PPacket->ref<uint32>(0x04));
+            if (pending != EntityUpdatePackets.end() && pending->second == PPacket.get())
+            {
+                EntityUpdatePackets.erase(pending);
+            }
             break;
+        }
         case 0x5B: // Position update
             if (PPacket->ref<uint32>(0x10) == this->id)
             {

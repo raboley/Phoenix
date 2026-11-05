@@ -47,6 +47,8 @@ public:
     void tick();
     void gotoZone(xi::ZoneId zoneId, sol::optional<sol::table> pos);
     void gotoMogHouse(xi::ZoneId zoneId);
+    void beginZoneIn(xi::ZoneId zoneId, sol::optional<sol::table> pos);
+    void finishLoadingZone();
     auto isPendingZone() const -> bool;
     auto getSearchMessage() const -> std::string;
     auto getItemInvSlot(uint16 itemId, uint8 quantity) const -> Maybe<uint16>;
@@ -67,7 +69,7 @@ public:
     static void Register();
 
 private:
-    void doGotoZone(xi::ZoneId zoneId, sol::optional<sol::table> pos, bool mogHouse);
+    void doGotoZone(xi::ZoneId zoneId, sol::optional<sol::table> pos, bool mogHouse, bool finishLoading);
 
     std::unique_ptr<TestChar> testChar_;
     CLuaSimulation*           simulation_;

@@ -516,6 +516,9 @@ void GP_CLI_COMMAND_ACTION::process(MapSession* PSession, CCharEntity* PChar) co
         break;
         case GP_CLI_COMMAND_ACTION_ACTIONID::SendResRdy:
         {
+            // The client sends this once it has loaded the zone and can take entity spawns.
+            PChar->hasLoadedZone = true;
+
             if (PChar->inMogHouse()) // TODO: For now this is only in the moghouse
             {
                 PChar->loc.zone->SpawnConditionalNPCs(PChar);

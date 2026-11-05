@@ -171,6 +171,14 @@ void CZoneEntities::TryAddToNearbySpawnLists(CBaseEntity* PEntity)
 
     FOR_EACH_PAIR_CAST_SECOND(CCharEntity*, PCurrentChar, m_charList)
     {
+        // A client still loading the zone drops the spawn packet, yet the entity would stay in its
+        // spawn list and never be sent again: characters zoning in together missed each other until
+        // one of them left. Such a client's own spawn pass picks the entity up once it has loaded.
+        if (PCurrentChar != PEntity && !PCurrentChar->hasLoadedZone)
+        {
+            continue;
+        }
+
         const auto isInRange = isWithinDistance(PEntity->loc.p, PCurrentChar->loc.p, ENTITY_RENDER_DISTANCE);
 
         if (isInRange)
@@ -1076,6 +1084,12 @@ void CZoneEntities::SpawnPCs(CCharEntity* PChar)
 
     // TODO: This is a temporary fix so that Feretory and Mog Garden _seem_ like a solo zones.
     if (PChar->loc.zone->GetID() == xi::ZoneId::Feretory || PChar->loc.zone->GetID() == xi::ZoneId::MogGarden)
+    {
+        return;
+    }
+
+    // Spawns sent while the client loads are lost (see TryAddToNearbySpawnLists).
+    if (!PChar->hasLoadedZone)
     {
         return;
     }

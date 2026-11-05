@@ -43,6 +43,8 @@ public:
     void sendBasicPacket(CBasicPacket& packet) const;
     void send(PacketC2S packetId, const sol::object& ffiData, size_t ffiSize);
     void sendZonePackets();
+    void sendZoneInPackets();
+    void sendResourcesReady();
 
     void parseIncoming();
     auto getIncoming() const -> sol::table;

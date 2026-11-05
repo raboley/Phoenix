@@ -731,6 +731,10 @@ public:
 
     bool requestedInfoSync = false;
 
+    // The client has finished loading this zone (see CZoneEntities::TryAddToNearbySpawnLists).
+    // Every zone-in loads a new entity, so this starts false for each zone.
+    bool hasLoadedZone = false;
+
     fishresponse_t* hookedFish;   // Currently hooked fish/item/monster
     uint32          nextFishTime; // When char is allowed to fish again
     uint32          lastCastTime; // When char last cast their rod

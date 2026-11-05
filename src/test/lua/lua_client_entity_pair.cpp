@@ -85,7 +85,7 @@ void CLuaClientEntityPair::tick()
 
 void CLuaClientEntityPair::gotoZone(xi::ZoneId zoneId, sol::optional<sol::table> pos)
 {
-    doGotoZone(zoneId, std::move(pos), false);
+    doGotoZone(zoneId, std::move(pos), false, true);
 }
 
 /************************************************************************
@@ -97,10 +97,36 @@ void CLuaClientEntityPair::gotoZone(xi::ZoneId zoneId, sol::optional<sol::table>
 
 void CLuaClientEntityPair::gotoMogHouse(xi::ZoneId zoneId)
 {
-    doGotoZone(zoneId, sol::nullopt, true);
+    doGotoZone(zoneId, sol::nullopt, true, true);
 }
 
-void CLuaClientEntityPair::doGotoZone(xi::ZoneId zoneId, sol::optional<sol::table> pos, bool mogHouse)
+/************************************************************************
+ *  Function: beginZoneIn()
+ *  Purpose : Zone the player, leaving its client on the loading screen
+ *  Example : player:beginZoneIn(xi.zone.BASTOK_MINES)
+ *            player:beginZoneIn(xi.zone.BASTOK_MINES, {x=100, y=0, z=-50})
+ *  Notes   : The client has logged into the zone but has not reported
+ *            it loaded. Packets queued meanwhile model what it receives
+ *            while loading. End the loading screen with finishLoadingZone().
+ ************************************************************************/
+
+void CLuaClientEntityPair::beginZoneIn(xi::ZoneId zoneId, sol::optional<sol::table> pos)
+{
+    doGotoZone(zoneId, std::move(pos), false, false);
+}
+
+/************************************************************************
+ *  Function: finishLoadingZone()
+ *  Purpose : End the loading screen started by beginZoneIn()
+ *  Example : player:finishLoadingZone()
+ ************************************************************************/
+
+void CLuaClientEntityPair::finishLoadingZone()
+{
+    packets().sendResourcesReady();
+}
+
+void CLuaClientEntityPair::doGotoZone(xi::ZoneId zoneId, sol::optional<sol::table> pos, bool mogHouse, bool finishLoading)
 {
     // Check if player is in an event
     if (testChar_->entity()->isInEvent())
@@ -118,7 +144,7 @@ void CLuaClientEntityPair::doGotoZone(xi::ZoneId zoneId, sol::optional<sol::tabl
     testChar_->entity()->status          = xi::Status::Disappear;
     charutils::SendToZone(testChar_->entity(), zoneId);
     charutils::removeCharFromZone(testChar_->entity());
-    packets().sendZonePackets(); // Send zone in packets, reload PChar
+    packets().sendZoneInPackets(); // Send zone in packets, reload PChar
 
     // Set on the reloaded entity so it sticks through the zone-in.
     testChar_->entity()->m_moghouseID = mogHouse ? testChar_->entity()->id : 0;
@@ -139,6 +165,11 @@ void CLuaClientEntityPair::doGotoZone(xi::ZoneId zoneId, sol::optional<sol::tabl
         entity->loc.p.y        = y;
         entity->loc.p.z        = z;
         entity->loc.p.rotation = rot;
+    }
+
+    if (finishLoading)
+    {
+        packets().sendResourcesReady();
     }
 
     // After zone-in we MUST perform these ticks in sequence, or events won't be
@@ -373,6 +404,8 @@ void CLuaClientEntityPair::Register()
     SOL_REGISTER("tick", CLuaClientEntityPair::tick);
     SOL_REGISTER("gotoZone", CLuaClientEntityPair::gotoZone);
     SOL_REGISTER("gotoMogHouse", CLuaClientEntityPair::gotoMogHouse);
+    SOL_REGISTER("beginZoneIn", CLuaClientEntityPair::beginZoneIn);
+    SOL_REGISTER("finishLoadingZone", CLuaClientEntityPair::finishLoadingZone);
     SOL_REGISTER("isPendingZone", CLuaClientEntityPair::isPendingZone);
     SOL_REGISTER("getSearchMessage", CLuaClientEntityPair::getSearchMessage);
     SOL_REGISTER("getItemInvSlot", CLuaClientEntityPair::getItemInvSlot);
