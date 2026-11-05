@@ -123,7 +123,8 @@ void GP_CLI_COMMAND_GROUP_SOLICIT_REQ::process(MapSession* PSession, CCharEntity
                     PInvitee->InvitePending.entity.ActIndex = PInviter->targid;
                     PInvitee->InvitePending.kind            = this->Kind;
 
-                    PInvitee->pushPacket<GP_SERV_COMMAND_GROUP_SOLICIT_REQ>(inviteeCharId, inviteeTargId, PInviter->getName(), PartyKind::Party);
+                    // UniqueNo and ActIndex name the inviter, as on the cross-map path below.
+                    PInvitee->pushPacket<GP_SERV_COMMAND_GROUP_SOLICIT_REQ>(PInviter->id, PInviter->targid, PInviter->getName(), PartyKind::Party);
 
                     ShowDebug("Sent party invite packet to %s", PInvitee->getName());
 
@@ -210,7 +211,8 @@ void GP_CLI_COMMAND_GROUP_SOLICIT_REQ::process(MapSession* PSession, CCharEntity
                     PInvitee->InvitePending.entity.ActIndex = PInviter->targid;
                     PInvitee->InvitePending.kind            = this->Kind;
 
-                    PInvitee->pushPacket<GP_SERV_COMMAND_GROUP_SOLICIT_REQ>(inviteeCharId, inviteeTargId, PInviter->getName(), PartyKind::Alliance);
+                    // UniqueNo and ActIndex name the inviter, as on the cross-map path below.
+                    PInvitee->pushPacket<GP_SERV_COMMAND_GROUP_SOLICIT_REQ>(PInviter->id, PInviter->targid, PInviter->getName(), PartyKind::Alliance);
 
                     ShowDebug("Sent party invite packet to %s", PInvitee->getName());
                 }
